@@ -22,4 +22,11 @@ public class User {
     @NotNull(message = "Birthday is required")
     @PastOrPresent(message = "Birthday must not be later than the current date")
     private LocalDate birthday;
+
+    public String getName() {
+        if (this.name == null || this.name.isBlank()) {
+            this.name = this.getLogin();
+        }
+        return this.name;
+    }
 }
