@@ -14,7 +14,7 @@ import java.util.List;
 @RequestMapping(value = "/users")
 @RequiredArgsConstructor
 public class UserController {
-    private final UserStorage users ;
+    private final UserStorage users;
 
     @GetMapping
     public List<User> findAll() {
