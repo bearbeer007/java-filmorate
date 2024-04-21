@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.services;
 
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exeption.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@Component
 public class FilmStorage {
     private final Map<Integer, Film> films = new HashMap<>();
     private final LocalDate sCinemaBirthday = LocalDate.of(1895, Month.DECEMBER, 28);

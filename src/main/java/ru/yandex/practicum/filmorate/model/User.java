@@ -10,9 +10,10 @@ public class User {
 
     private int id;
     @Email(message = "Email is incorrect")
-    @NotNull(message = "Email is required")
+    @NotBlank(message = "Email is required")
     private String email;
-    @NotNull(message = "Login is required")
+    @NotBlank(message = "Login is required")
+    @Pattern(regexp = "\\S+", message = "Login must not contain space characters")
     private String login;
     private String name;
     @NotNull(message = "Birthday is required")
