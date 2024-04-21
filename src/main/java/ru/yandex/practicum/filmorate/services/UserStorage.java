@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.services;
 
+import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exeption.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -8,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Service
 public class UserStorage {
     private final Map<Integer, User> users = new HashMap<>();
 

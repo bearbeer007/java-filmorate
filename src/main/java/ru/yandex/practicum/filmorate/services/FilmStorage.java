@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.services;
 
+import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exeption.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -10,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Service
 public class FilmStorage {
     private final Map<Integer, Film> films = new HashMap<>();
     private final LocalDate sCinemaBirthday = LocalDate.of(1895, Month.DECEMBER, 28);
@@ -27,10 +29,10 @@ public class FilmStorage {
     }
 
     public Film updateFilm(Film film) {
-        validate(film);
         if (!films.containsKey(film.getId())) {
             throw new ValidationException("Film not found");
         }
+        validate(film);
         films.put(film.getId(), film);
         return film;
     }

@@ -1,9 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -15,7 +12,7 @@ public class User {
     @Email(message = "Email is incorrect")
     @NotNull(message = "Email is required")
     private String email;
-    @NotNull(message = "Login is required")
+    @NotBlank(message = "Login is required")
     @Pattern(regexp = "\\S+", message = "Login must not contain space characters")
     private String login;
     private String name;

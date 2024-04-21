@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
-import lombok.SneakyThrows;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -14,11 +14,11 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping(value = "/films")
+@RequiredArgsConstructor
 public class FilmController {
 
-    private final FilmStorage films = new FilmStorage();
+    private final FilmStorage films ;
 
-    @SneakyThrows
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
         log.info("Film > Post Request {}", film);
