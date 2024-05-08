@@ -24,6 +24,7 @@ public class User {
     private LocalDate birthday;
     @JsonIgnore
     private Set<Long> friendsIds = new HashSet<>();
+
     public String getName() {
         if (this.name == null || this.name.isBlank()) {
             this.name = this.getLogin();
