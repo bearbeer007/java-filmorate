@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.services.interfaces.UserService;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
@@ -50,8 +49,11 @@ public class UserController {
     }
 
     @DeleteMapping(value = "/{id}/friends/{friendId}")
-    public void deleteFriend(@PathVariable("id") Long id, @PathVariable("friendId") Long friendId) {
-        userService.deleteFriend(id, friendId);
+    public List<User> deleteFriend(@PathVariable("id") Long id,
+                                   @PathVariable("friendId") Long friendId) {
+        List<User> friends = userService.deleteFriend(id, friendId);
+        return friends;
+
     }
 
     @GetMapping(value = "/{id}/friends")
@@ -60,9 +62,9 @@ public class UserController {
     }
 
     @GetMapping(value = "/{id}/friends/common/{otherId}")
-    public List<Optional<User>> getCommonFriends(@PathVariable("id") Long id,
-                                                 @PathVariable("otherId") Long otherId) {
-        List<Optional<User>> commonFriends = userService.commonFriends(id, otherId);
+    public List<User> getCommonFriends(@PathVariable("id") Long id,
+                                       @PathVariable("otherId") Long otherId) {
+        List<User> commonFriends = userService.commonFriends(id, otherId);
         return commonFriends;
     }
 }

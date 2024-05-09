@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class FilmServiceImpl implements FilmService {
-
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
 
@@ -38,21 +37,13 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public Film getFilmById(Long id) {
-        return filmStorage.getFilmById(id).orElseThrow(
-                () -> new NotFoundException(String.format("Фильм с таким id: %s, отсутствует", id)));
+        return findFilmById(id);
     }
 
     @Override
     public Film addLike(Long filmId, Long userId) {
-        Optional<User> optionalUser = userStorage.getUserById(userId);
-        Optional<Film> optionalFilm = filmStorage.getFilmById(filmId);
-
-        if (optionalUser.isEmpty() || optionalFilm.isEmpty()) {
-            throw new NotFoundException("User or film not found");
-        }
-
-        User user = optionalUser.get();
-        Film film = optionalFilm.get();
+        User user = findUserById(userId);
+        Film film = findFilmById(filmId);
 
         if (!user.getLikedFilms().contains(film.getId())) {
             user.getLikedFilms().add(film.getId());
@@ -63,10 +54,8 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public void deleteLike(Long filmId, Long userId) {
-        Optional<User> optionalUser = userStorage.getUserById(userId);
-        Optional<Film> optionalFilm = filmStorage.getFilmById(filmId);
-        User user = optionalUser.get();
-        Film film = optionalFilm.get();
+        User user = findUserById(userId);
+        Film film = findFilmById(filmId);
 
         if (user.getLikedFilms().contains(film.getId())) {
             user.getLikedFilms().remove(film.getId());
@@ -76,16 +65,21 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> getPopularFilms(Long size) {
-        if (size == null) size = 10l;
+        if (size == null) size = 10L;
         return filmStorage.getAllFilms().stream()
-                .sorted(new Comparator<Film>() {
-                    @Override
-                    public int compare(Film o1, Film o2) {
-                        if (o1.getLikes() == o2.getLikes()) return Long.compare(o1.getId(), o2.getId());
-                        return Long.compare(o2.getLikes(), o1.getLikes());
-                    }
-                })
+                .sorted(Comparator.comparingLong(Film::getLikes).reversed()
+                        .thenComparingLong(Film::getId))
                 .limit(size)
                 .collect(Collectors.toList());
+    }
+
+    private User findUserById(Long userId) {
+        return userStorage.getUserById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+    }
+
+    private Film findFilmById(Long filmId) {
+        return filmStorage.getFilmById(filmId)
+                .orElseThrow(() -> new NotFoundException(String.format("Фильм с таким id: %s, отсутствует", filmId)));
     }
 }

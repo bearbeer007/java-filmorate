@@ -25,8 +25,6 @@ public class User {
     @PastOrPresent(message = "Birthday must not be later than the current date")
     private LocalDate birthday;
 
-    private Set<Long> friendsIds;
-
     private final Set<Long> friends = new HashSet<>();
 
     private final Set<Long> likedFilms = new HashSet<>();

@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.services.interfaces.UserService;
 import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -17,16 +18,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User addUser(User user) {
-        var createdUser = userStorage.addUser(user);
         checkName(user);
-        return createdUser;
+        return userStorage.addUser(user);
     }
 
     @Override
     public User updateUser(User user) {
-        var updatedUser = userStorage.updateUser(user);
-        checkName(updatedUser);
-        return updatedUser;
+        checkName(user);
+        return userStorage.updateUser(user);
     }
 
     @Override
@@ -36,70 +35,64 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserById(Long id) {
-        return userStorage.getUserById(id).orElseThrow(
-                () -> new NotFoundException(String.format("Пользователь с таким id: %s, отсутствует", id)));
+        return findUserById(id);
     }
 
     @Override
     public List<User> addFriend(Long userId, Long friendId) {
-        if (!userId.equals(friendId)) {
-            Optional<User> optionalUser1 = userStorage.getUserById(userId);
-            Optional<User> optionalFriend2 = userStorage.getUserById(friendId);
-            User u1 = optionalUser1.get();
-            User u2 = optionalFriend2.get();
-            u1.getFriends().add(u2.getId());
-            u2.getFriends().add(u1.getId());
-            return List.of(u1, u2);
-        }
-        throw new ValidationException("Identical IDs. The user cannot add himself as a friend.");
+        validateDifferentIds(userId, friendId);
+        User user1 = findUserById(userId);
+        User user2 = findUserById(friendId);
+        user1.getFriends().add(user2.getId());
+        user2.getFriends().add(user1.getId());
+        return List.of(user1, user2);
     }
 
     @Override
-    public void deleteFriend(Long userId, Long friendId) {
-        var user = getUserById(userId);
-        var friend = getUserById(friendId);
-        user.getFriendsIds().remove(friendId);
-        friend.getFriendsIds().remove(userId);
+    public List<User> deleteFriend(Long userId, Long friendId) {
+        validateDifferentIds(userId, friendId);
+        User user1 = findUserById(userId);
+        User user2 = findUserById(friendId);
+        user1.getFriends().remove(user2.getId());
+        user2.getFriends().remove(user1.getId());
+        return List.of(user1, user2);
     }
 
     @Override
     public List<User> getFriends(Long id) {
-        var user = getUserById(id);
-        List<User> userFriends = new ArrayList<>();
-        for (Long friendsId : user.getFriendsIds()) {
-            if (getUserById(friendsId) != null) {
-                userFriends.add(getUserById(friendsId));
-            } else {
-                throw new NotFoundException("User id doesn't exist");
-            }
-        }
-        return userFriends;
+        User user = findUserById(id);
+        return user.getFriends().stream()
+                .map(this::findUserById)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public List<Optional<User>> commonFriends(Long userFirst, Long userSecond) {
-        if (!userFirst.equals(userSecond)) {
-            Optional<User> optionalUserFirst = userStorage.getUserById(userFirst);
-            Optional<User> optionalUserSecond = userStorage.getUserById(userSecond);
-            User u1 = optionalUserFirst.get();
-            User u2 = optionalUserSecond.get();
-            u1.getFriends().add(u2.getId());
-            u2.getFriends().add(u1.getId());
-
-            Set<Long> common = new HashSet<>(u1.getFriends());
-            common.retainAll(u2.getFriends());
-            List<Optional<User>> commonFriends = new ArrayList<>();
-            for (Long id : common) {
-                commonFriends.add(userStorage.getUserById(id));
-            }
-            return commonFriends;
-        }
-        throw new ValidationException("Identical IDs.");
+    public List<User> commonFriends(Long userFirst, Long userSecond) {
+        validateDifferentIds(userFirst, userSecond);
+        User user1 = findUserById(userFirst);
+        User user2 = findUserById(userSecond);
+        Set<Long> commonFriendIds = new HashSet<>(user1.getFriends());
+        commonFriendIds.retainAll(user2.getFriends());
+        return commonFriendIds.stream()
+                .map(this::findUserById)
+                .collect(Collectors.toList());
     }
+
 
     private void checkName(User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
+        }
+    }
+
+    private User findUserById(Long userId) {
+        return userStorage.getUserById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format("Пользователь с таким id: %s, отсутствует", userId)));
+    }
+
+    private void validateDifferentIds(Long id1, Long id2) {
+        if (id1.equals(id2)) {
+            throw new ValidationException("Identical IDs. The user cannot add himself as a friend.");
         }
     }
 }
