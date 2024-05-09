@@ -12,8 +12,8 @@ import java.util.*;
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
 
-    private final Map<Integer, Film> films = new HashMap<>();
-    private int idGenerator = 1;
+    private final Map<Long, Film> films = new HashMap<>();
+    private long idGenerator = 1;
 
     @Override
     public Film addFilm(Film filmFromRequest) {

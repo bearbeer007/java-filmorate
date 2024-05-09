@@ -27,9 +27,9 @@ public class User {
 
     private Set<Long> friendsIds;
 
-    private final Set<Integer> friends = new HashSet<>();
+    private final Set<Long> friends = new HashSet<>();
 
-    private final Set<Integer> likedFilms = new HashSet<>();
+    private final Set<Long> likedFilms = new HashSet<>();
 
     public String getName() {
         if (this.name == null || this.name.isBlank()) {

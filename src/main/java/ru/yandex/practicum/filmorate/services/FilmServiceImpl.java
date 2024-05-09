@@ -81,8 +81,8 @@ public class FilmServiceImpl implements FilmService {
                 .sorted(new Comparator<Film>() {
                     @Override
                     public int compare(Film o1, Film o2) {
-                        if (o1.getLikes() == o2.getLikes()) return Integer.compare(o1.getId(), o2.getId());
-                        return Integer.compare(o2.getLikes(), o1.getLikes());
+                        if (o1.getLikes() == o2.getLikes()) return Long.compare(o1.getId(), o2.getId());
+                        return Long.compare(o2.getLikes(), o1.getLikes());
                     }
                 })
                 .limit(size)
