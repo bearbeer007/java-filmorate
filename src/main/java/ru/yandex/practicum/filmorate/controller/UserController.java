@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.services.interfaces.UserService;
@@ -11,17 +12,22 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
+@Slf4j
 public class UserController {
 
     private final UserService userService;
 
     @PostMapping
     public User addUser(@Valid @RequestBody User user) {
+        log.info("Request body: " + user.toString());
+        log.info("Request body: " + userService.addUser(user).toString());
         return userService.addUser(user);
     }
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
+        log.info("Request body: " + user.toString());
+        log.info("Request body: " + userService.updateUser(user).toString());
         return userService.updateUser(user);
     }
 

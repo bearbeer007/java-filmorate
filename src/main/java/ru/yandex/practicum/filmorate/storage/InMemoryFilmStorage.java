@@ -16,24 +16,22 @@ public class InMemoryFilmStorage implements FilmStorage {
     private int idGenerator = 1;
 
     @Override
-    public Film addFilm(Film film) {
-        film.setId(idGenerator);
-        log.info("Фильм добавлен, присвоен номер id: {}.", film.getId());
+    public Film addFilm(Film filmFromRequest) {
+        Film film = filmFromRequest.toBuilder()
+                .id(idGenerator++)
+                .build();
         films.put(film.getId(), film);
-        idGenerator++;
         return film;
     }
 
     @Override
     public Film updateFilm(Film film) {
         if (films.containsKey(film.getId())) {
-            log.info("Фильм с номером id: {}, обновлен.", film.getId());
-            films.put(film.getId(), film);
+            films.replace(film.getId(), film);
+            return film;
         } else {
-            log.info("Фильм с таким id: {}, отсутствует", film.getId());
-            throw new NotFoundException(String.format("Фильм с таким id: %s, отсутствует", film.getId()));
+            throw new NotFoundException(String.format("Film with id=%d was not found.", film.getId()));
         }
-        return film;
     }
 
     @Override
@@ -43,6 +41,10 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Optional<Film> getFilmById(Long id) {
-        return Optional.ofNullable(films.get(id));
+        if (films.containsKey(id)) {
+            return Optional.ofNullable(films.get(id));
+        } else {
+            throw new NotFoundException(String.format("Film with id=%d was not found.", id));
+        }
     }
 }

@@ -28,11 +28,15 @@ public class FilmController {
 
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
+        log.info("Request body: " + film.toString());
+        log.info("Response body: " + filmService.addFilm(film).toString());
         return filmService.addFilm(film);
     }
 
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
+        log.info("Request body: " + film.toString());
+        log.info("Response body: " + filmService.updateFilm(film).toString());
         return filmService.updateFilm(film);
     }
 

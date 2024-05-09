@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Data;
 
 
@@ -14,6 +15,7 @@ import java.util.Set;
 
 
 @Data
+@Builder(toBuilder = true)
 public class Film {
 
     private int id;
@@ -25,6 +27,8 @@ public class Film {
     private LocalDate releaseDate;
     @Positive(message = "Duration is required and must be greater than 0")
     private long duration;
-    @JsonIgnore
-    private Set<Long> likeIds = new HashSet<>();
+
+    private Set<Long> usersLikes;
+
+    private int likes = 0;
 }
