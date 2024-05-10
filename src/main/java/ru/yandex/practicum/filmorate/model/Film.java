@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
@@ -24,8 +25,8 @@ public class Film {
     private LocalDate releaseDate;
     @Positive(message = "Duration is required and must be greater than 0")
     private long duration;
-
+    @JsonIgnore
     private Set<Long> usersLikes;
-
+    @JsonIgnore
     private int likes = 0;
 }

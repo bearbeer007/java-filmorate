@@ -41,10 +41,6 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Optional<Film> getFilmById(Long id) {
-        if (films.containsKey(id)) {
-            return Optional.ofNullable(films.get(id));
-        } else {
-            throw new NotFoundException(String.format("Film with id=%d was not found.", id));
-        }
+        return Optional.ofNullable(films.get(id));
     }
 }

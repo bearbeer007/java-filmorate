@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
@@ -23,9 +24,9 @@ public class User {
     @NotNull(message = "Birthday is required")
     @PastOrPresent(message = "Birthday must not be later than the current date")
     private LocalDate birthday;
-
+    @JsonIgnore
     private final Set<Long> friends = new HashSet<>();
-
+    @JsonIgnore
     private final Set<Long> likedFilms = new HashSet<>();
 
     public String getName() {

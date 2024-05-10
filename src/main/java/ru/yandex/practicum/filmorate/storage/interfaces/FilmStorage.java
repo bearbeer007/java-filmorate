@@ -10,9 +10,9 @@ public interface FilmStorage {
 
     Film addFilm(Film film);
 
-    Film updateFilm(Film film) throws NotFoundException;
+    Film updateFilm(Film film) ;
 
     List<Film> getAllFilms();
 
-    Optional<Film> getFilmById(Long id) throws NotFoundException;
+    Optional<Film> getFilmById(Long id) ;
 }
