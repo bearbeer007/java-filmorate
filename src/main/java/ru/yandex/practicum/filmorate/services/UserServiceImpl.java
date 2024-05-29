@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.services.interfaces.UserService;
 import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,31 +38,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> addFriend(Long userId, Long friendId) {
+    public User addFriend(Long userId, Long friendId) {
         validateDifferentIds(userId, friendId);
         User user1 = findUserById(userId);
         User user2 = findUserById(friendId);
-        user1.getFriends().add(user2.getId());
-        user2.getFriends().add(user1.getId());
-        return List.of(user1, user2);
+        return userStorage.addFriend(userId, friendId);
     }
 
     @Override
-    public List<User> deleteFriend(Long userId, Long friendId) {
+    public void deleteFriend(Long userId, Long friendId) {
         validateDifferentIds(userId, friendId);
         User user1 = findUserById(userId);
         User user2 = findUserById(friendId);
-        user1.getFriends().remove(user2.getId());
-        user2.getFriends().remove(user1.getId());
-        return List.of(user1, user2);
+        userStorage.deleteFriend(userId, friendId);
     }
 
     @Override
     public List<User> getFriends(Long id) {
         User user = findUserById(id);
-        return user.getFriends().stream()
-                .map(this::findUserById)
-                .collect(Collectors.toList());
+        return userStorage.getFriends(id);
     }
 
     @Override
@@ -71,11 +64,7 @@ public class UserServiceImpl implements UserService {
         validateDifferentIds(userFirst, userSecond);
         User user1 = findUserById(userFirst);
         User user2 = findUserById(userSecond);
-        Set<Long> commonFriendIds = new HashSet<>(user1.getFriends());
-        commonFriendIds.retainAll(user2.getFriends());
-        return commonFriendIds.stream()
-                .map(this::findUserById)
-                .collect(Collectors.toList());
+        return userStorage.commonFriends(userFirst, userSecond);
     }
 
 
@@ -86,7 +75,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private User findUserById(Long userId) {
-        return userStorage.getUserById(userId)
+        return userStorage.findUserById(userId)
                 .orElseThrow(() -> new NotFoundException(String.format("Пользователь с таким id: %s, отсутствует", userId)));
     }
 

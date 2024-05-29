@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
-import ru.yandex.practicum.filmorate.validation.MovieBirthday;
+import ru.yandex.practicum.filmorate.validator.interfaces.ValidReleaseDate;
 
 
 import java.time.LocalDate;
@@ -16,17 +16,18 @@ import java.util.Set;
 public class Film {
 
     private Long id;
-    @NotBlank(message = "Name is required")
+    @NotBlank
     private String name;
-    @Size(max = 200, message = "Description must be maximum 200 characters")
+    @Size(min = 0, max = 200)
+    @NotNull
     private String description;
-    @NotNull(message = "Release date is required")
-    @MovieBirthday
+    @ValidReleaseDate
     private LocalDate releaseDate;
-    @Positive(message = "Duration is required and must be greater than 0")
-    private long duration;
+    @Positive
+    @NotNull
+    private Integer duration;
     @JsonIgnore
-    private Set<Long> usersLikes;
-    @JsonIgnore
-    private int likes = 0;
+    private Set<Long> likeIds;
+    private Set<Genre> genres;
+    private Mpa mpa;
 }
