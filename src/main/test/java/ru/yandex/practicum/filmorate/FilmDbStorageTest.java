@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.LikesDbStorage;
 import ru.yandex.practicum.filmorate.storage.UserDbStorage;
-import ru.yandex.practicum.filmorate.storage.interfaces.LikesStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -169,7 +168,7 @@ public class FilmDbStorageTest {
 
         likesStorage.addLike(createdFilm1.getId(), createdUser.getId());
         assertTrue(likeAdded(createdFilm1.getId(), createdUser.getId()));
-        filmStorage.deleteLike(createdFilm1.getId(), createdUser.getId());
+        likesStorage.deleteLike(createdFilm1.getId(), createdUser.getId());
         assertTrue(likeRemoved(createdFilm1.getId(), createdUser.getId()));
     }
 
