@@ -65,7 +65,6 @@ public class UserDbStorage implements UserStorage {
     }
 
 
-
     private Map<String, Object> toMap(User user) {
         Map<String, Object> values = new HashMap<>();
         values.put("id", user.getId());
