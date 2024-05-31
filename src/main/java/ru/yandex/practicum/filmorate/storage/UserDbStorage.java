@@ -64,33 +64,7 @@ public class UserDbStorage implements UserStorage {
         }
     }
 
-    @Override
-    public User addFriend(Long userId, Long friendId) {
-        String sqlQuery = "insert into users_friendship (user_id, friend_id) values (?, ?)";
-        jdbcTemplate.update(sqlQuery, userId, friendId);
-        return findUserById(userId).get();
-    }
 
-    @Override
-    public void deleteFriend(Long userId, Long friendId) {
-        String sqlQuery = "delete from users_friendship where user_id = ? and friend_id = ?";
-        jdbcTemplate.update(sqlQuery, userId, friendId);
-    }
-
-    @Override
-    public List<User> getFriends(Long id) {
-        String sqlQuery = "select * from users where id in " +
-                "(select friend_id from users_friendship where user_id = ?)";
-        return jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToUser, id);
-    }
-
-    @Override
-    public List<User> commonFriends(Long userFirst, Long userSecond) {
-        String sqlQuery = "select * from users where id in " +
-                "(select friend_id from users_friendship where user_id = ?) " +
-                "and id in (select friend_id from users_friendship where user_id = ?)";
-        return jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToUser, userFirst, userSecond);
-    }
 
     private Map<String, Object> toMap(User user) {
         Map<String, Object> values = new HashMap<>();

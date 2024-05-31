@@ -13,11 +13,11 @@ public interface UserService {
 
     User getUserById(Long id);
 
-    User addFriend(Long userId, Long friendId);
+  // User addFriend(Long userId, Long friendId);
 
-    void deleteFriend(Long userId, Long friendId);
+  // void deleteFriend(Long userId, Long friendId);
 
-    List<User> getFriends(Long id);
+  // List<User> getFriends(Long id);
 
-    List<User> commonFriends(Long userFirst, Long userSecond);
+  //  List<User> commonFriends(Long userFirst, Long userSecond);
 }

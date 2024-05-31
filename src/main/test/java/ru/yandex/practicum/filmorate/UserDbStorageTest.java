@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.FriendsDbStorage;
 import ru.yandex.practicum.filmorate.storage.UserDbStorage;
 
 import java.time.LocalDate;
@@ -105,6 +106,8 @@ public class UserDbStorageTest {
                 .build();
         UserDbStorage userStorage = new UserDbStorage(jdbcTemplate);
         User createdUser = userStorage.addUser(newUser);
+        FriendsDbStorage friendsDbStorage = new FriendsDbStorage(jdbcTemplate);
+
 
         User newUser2 = User.builder()
                 .email("email@email.ru")
@@ -114,7 +117,7 @@ public class UserDbStorageTest {
                 .build();
         User createdFriend = userStorage.addUser(newUser2);
 
-        userStorage.addFriend(createdUser.getId(), createdFriend.getId());
+        friendsDbStorage.addFriend(createdUser.getId(), createdFriend.getId());
         assertTrue(friendAdded(createdUser.getId(), createdFriend.getId()));
     }
 
@@ -128,6 +131,8 @@ public class UserDbStorageTest {
                 .build();
         UserDbStorage userStorage = new UserDbStorage(jdbcTemplate);
         User createdUser = userStorage.addUser(newUser);
+        FriendsDbStorage friendsDbStorage = new FriendsDbStorage(jdbcTemplate);
+
 
         User newUser2 = User.builder()
                 .email("email@email.ru")
@@ -136,16 +141,16 @@ public class UserDbStorageTest {
                 .birthday(LocalDate.of(1980, 1, 1))
                 .build();
         User createdFriend = userStorage.addUser(newUser2);
-        userStorage.addFriend(createdUser.getId(), createdFriend.getId());
+        friendsDbStorage.addFriend(createdUser.getId(), createdFriend.getId());
         assertTrue(friendAdded(createdUser.getId(), createdFriend.getId()));
-        userStorage.deleteFriend(createdUser.getId(), createdFriend.getId());
+        friendsDbStorage.deleteFriend(createdUser.getId(), createdFriend.getId());
         assertTrue(friendRemoved(createdUser.getId(), createdFriend.getId()));
     }
 
     @Test
     public void testGetFriends() {
         UserDbStorage userStorage = new UserDbStorage(jdbcTemplate);
-
+        FriendsDbStorage friendsDbStorage = new FriendsDbStorage(jdbcTemplate);
         User newUser = User.builder()
                 .email("user@email.ru")
                 .login("vanya123")
@@ -169,9 +174,9 @@ public class UserDbStorageTest {
         var createdFriend1 = userStorage.addUser(userFriend1);
         var createdFriend2 = userStorage.addUser(userFriend2);
 
-        userStorage.addFriend(createdUser.getId(), createdFriend1.getId());
-        userStorage.addFriend(createdUser.getId(), createdFriend2.getId());
-        List<User> users = userStorage.getFriends(createdUser.getId());
+        friendsDbStorage.addFriend(createdUser.getId(), createdFriend1.getId());
+        friendsDbStorage.addFriend(createdUser.getId(), createdFriend2.getId());
+        List<User> users = friendsDbStorage.getFriendsList(createdUser.getId());
 
         List<User> friends = new ArrayList<>();
         friends.add(createdFriend1);
@@ -186,6 +191,7 @@ public class UserDbStorageTest {
     @Test
     public void testCommonFriends() {
         UserDbStorage userStorage = new UserDbStorage(jdbcTemplate);
+        FriendsDbStorage friendsDbStorage = new FriendsDbStorage(jdbcTemplate);
 
         User newUser = User.builder()
                 .email("user@email.ru")
@@ -224,12 +230,12 @@ public class UserDbStorageTest {
         var createdFriend2 = userStorage.addUser(userFriend2);
         var createdFriend3 = userStorage.addUser(userFriend3);
 
-        userStorage.addFriend(createdUser1.getId(), createdFriend1.getId());
-        userStorage.addFriend(createdUser1.getId(), createdFriend2.getId());
-        userStorage.addFriend(createdUser1.getId(), createdFriend3.getId());
-        userStorage.addFriend(createdUser2.getId(), createdFriend2.getId());
-        userStorage.addFriend(createdUser2.getId(), createdFriend1.getId());
-        List<User> users = userStorage.commonFriends(createdUser1.getId(), createdUser2.getId());
+        friendsDbStorage.addFriend(createdUser1.getId(), createdFriend1.getId());
+        friendsDbStorage.addFriend(createdUser1.getId(), createdFriend2.getId());
+        friendsDbStorage.addFriend(createdUser1.getId(), createdFriend3.getId());
+        friendsDbStorage.addFriend(createdUser2.getId(), createdFriend2.getId());
+        friendsDbStorage.addFriend(createdUser2.getId(), createdFriend1.getId());
+        List<User> users = friendsDbStorage.commonFriends(createdUser1.getId(), createdUser2.getId());
 
         List<User> friends = new ArrayList<>();
         friends.add(createdFriend1);
