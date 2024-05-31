@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.services.interfaces.*;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.interfaces.LikesStorage;
 
 import java.util.HashSet;
 import java.util.List;
@@ -21,7 +22,8 @@ public class FilmServiceImpl implements FilmService {
     private final UserService userService;
     private final MpaService mpaService;
     private final GenreService genreService;
-    private final LikesService likesService;
+    //private final LikesService likesService;
+    private final LikesStorage likesStorage;
 
     @Override
     public Film addFilm(Film film) {
@@ -32,7 +34,7 @@ public class FilmServiceImpl implements FilmService {
         }
         if (!film.getLikeIds().isEmpty()) {
             for (Long likeId : film.getLikeIds()) {
-                filmStorage.addLike(createdFilm.getId(), likeId);
+                likesStorage.addLike(createdFilm.getId(), likeId);
             }
         }
         if (film.getGenres() != null) {
@@ -74,7 +76,7 @@ public class FilmServiceImpl implements FilmService {
 
         if (film.getLikeIds() != null) {
             for (Long likeId : film.getLikeIds()) {
-                filmStorage.addLike(updatedFilm.getId(), likeId);
+                likesStorage.addLike(updatedFilm.getId(), likeId);
             }
         }
 
@@ -103,33 +105,12 @@ public class FilmServiceImpl implements FilmService {
                 .description(film.getDescription())
                 .releaseDate(film.getReleaseDate())
                 .mpa(mpaService.getRatingByFilmId(id))
-                .likeIds(likesService.getLikes(film.getId()))
+                .likeIds(likesStorage.getLikes(film.getId()))
                 .genres(genreService.getAllGenresByFilm(film.getId()))
                 .build();
     }
 
-    @Override
-    public Film addLike(Long filmId, Long userId) {
-        var film = getFilmById(filmId);
-        userService.getUserById(userId);
-        if (likesService.getLikes(filmId).contains(userId)) {
-            throw new BadRequestException("One user - one like, exceeded the allowed number of likes");
 
-        }
-        return filmStorage.addLike(filmId, userId);
-    }
-
-    @Override
-    public void deleteLike(Long filmId, Long userId) {
-        var film = getFilmById(filmId);
-        userService.getUserById(userId);
-
-        if (!likesService.getLikes(filmId).contains(userId)) {
-            throw new NotFoundException(
-                    String.format("No like from user with id - %s to film with id - %s", userId, filmId));
-        }
-        filmStorage.deleteLike(filmId, userId);
-    }
 
     @Override
     public List<Film> getPopularFilms(Long size) {

@@ -10,7 +10,9 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.LikesDbStorage;
 import ru.yandex.practicum.filmorate.storage.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.interfaces.LikesStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -114,6 +116,7 @@ public class FilmDbStorageTest {
     public void testAddLikeFilms() {
         FilmDbStorage filmStorage = new FilmDbStorage(jdbcTemplate);
         UserDbStorage userStorage = new UserDbStorage(jdbcTemplate);
+        LikesDbStorage likesStorage = new LikesDbStorage(jdbcTemplate,filmStorage);
         Mpa mpa = Mpa.builder()
                 .id(1)
                 .name("R").build();
@@ -134,7 +137,7 @@ public class FilmDbStorageTest {
                 .build();
         User createdUser = userStorage.addUser(newUser);
 
-        filmStorage.addLike(createdFilm1.getId(), createdUser.getId());
+        likesStorage.addLike(createdFilm1.getId(), createdUser.getId());
         assertTrue(likeAdded(createdFilm1.getId(), createdUser.getId()));
     }
 
@@ -142,6 +145,8 @@ public class FilmDbStorageTest {
     public void testDeleteLikeFilms() {
         FilmDbStorage filmStorage = new FilmDbStorage(jdbcTemplate);
         UserDbStorage userStorage = new UserDbStorage(jdbcTemplate);
+        LikesDbStorage likesStorage = new LikesDbStorage(jdbcTemplate,filmStorage);
+
         Mpa mpa = Mpa.builder()
                 .id(1)
                 .name("R").build();
@@ -162,7 +167,7 @@ public class FilmDbStorageTest {
                 .build();
         User createdUser = userStorage.addUser(newUser);
 
-        filmStorage.addLike(createdFilm1.getId(), createdUser.getId());
+        likesStorage.addLike(createdFilm1.getId(), createdUser.getId());
         assertTrue(likeAdded(createdFilm1.getId(), createdUser.getId()));
         filmStorage.deleteLike(createdFilm1.getId(), createdUser.getId());
         assertTrue(likeRemoved(createdFilm1.getId(), createdUser.getId()));
@@ -172,6 +177,8 @@ public class FilmDbStorageTest {
     public void testGetPopularFilms() {
         FilmDbStorage filmStorage = new FilmDbStorage(jdbcTemplate);
         UserDbStorage userStorage = new UserDbStorage(jdbcTemplate);
+        LikesDbStorage likesStorage = new LikesDbStorage(jdbcTemplate,filmStorage);
+
         Mpa mpa = Mpa.builder()
                 .id(1)
                 .name("R").build();
@@ -215,9 +222,9 @@ public class FilmDbStorageTest {
                 .build();
         User createdUser2 = userStorage.addUser(newUser2);
 
-        filmStorage.addLike(createdFilm3.getId(), createdUser.getId());
-        filmStorage.addLike(createdFilm3.getId(), createdUser2.getId());
-        filmStorage.addLike(createdFilm2.getId(), createdUser2.getId());
+        likesStorage.addLike(createdFilm3.getId(), createdUser.getId());
+        likesStorage.addLike(createdFilm3.getId(), createdUser2.getId());
+        likesStorage.addLike(createdFilm2.getId(), createdUser2.getId());
 
         List<Film> films = filmStorage.getPopularFilms(3L);
         List<Film> filmsDb = new ArrayList<>();

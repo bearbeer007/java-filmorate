@@ -29,5 +29,6 @@ public class Film {
     @JsonIgnore
     private Set<Long> likeIds;
     private Set<Genre> genres;
+    @NotNull
     private Mpa mpa;
 }

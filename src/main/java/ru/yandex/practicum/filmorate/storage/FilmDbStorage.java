@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -62,42 +61,50 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getAllFilms() {
-        String sqlQuery = "select * from films";
+        String sqlQuery = "select f.*, " +
+                "m.id as mpa_id, m.name as mpa_name, " +
+                "group_concat(g.id) as genre_ids, group_concat(g.name) as genre_names, " +
+                "count(l.user_id) as likes " +
+                "from films f " +
+                "left join RATINGS m on f.rating_mpa_id = m.id " +
+                "left join film_genres fg on f.id = fg.film_id " +
+                "left join genres g on fg.genre_id = g.id " +
+                "left join like_films l on f.id = l.film_id " +
+                "group by f.id, m.id";
+        ;
         return jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToFilm);
     }
 
     @Override
     public Optional<Film> findFilmById(Long id) {
-        String sqlQuery = "select * from films where id = ?";
-        try {
-            Film film = jdbcTemplate.queryForObject(sqlQuery, MapRowClass::mapRowToFilm, id);
-            return Optional.ofNullable(film);
-        } catch (
-                DataAccessException e) {
-            throw new NotFoundException("Id doesn't exists. " + id);
-        }
-    }
+        String sqlQuery = "select f.*, " +
+                "m.id as mpa_id, m.name as mpa_name, " +
+                "group_concat(g.id) as genre_ids, group_concat(g.name) as genre_names, " +
+                "count(l.user_id) as likes " +
+                "from films f " +
+                "left join RATINGS m on f.rating_mpa_id = m.id " +
+                "left join film_genres fg on f.id = fg.film_id " +
+                "left join genres g on fg.genre_id = g.id " +
+                "left join like_films l on f.id = l.film_id " +
+                "where f.id =?" +
+                "group by f.id, m.id";
 
-    @Override
-    public Film addLike(Long filmId, Long userId) {
-        String sqlQuery = "insert into like_films (film_id, user_id) values (?, ?)";
-        jdbcTemplate.update(sqlQuery, filmId, userId);
-        return findFilmById(filmId).get();
-    }
+        Film film = jdbcTemplate.queryForObject(sqlQuery, MapRowClass::mapRowToFilm, id);
+        return Optional.ofNullable(film);
 
-    @Override
-    public void deleteLike(Long filmId, Long userId) {
-        String sqlQuery = "delete from like_films where film_id = ? and user_id = ?";
-        jdbcTemplate.update(sqlQuery, filmId, userId);
     }
 
     @Override
     public List<Film> getPopularFilms(Long count) {
         String sqlQuery = "select f.id, f.name, f.description, f.release_date, f.duration " +
                 "from films f " +
-                "join like_films l on f.id = l.film_id " +
-                "group by l.film_id " +
-                "order by count(l.user_id) desc " +
+                "join like_films l1 on f.id = l1.film_id " +
+                "left join RATINGS m on f.rating_mpa_id = m.id " +
+                "left join film_genres fg on f.id = fg.film_id " +
+                "left join genres g on fg.genre_id = g.id " +
+                "left join like_films l2 on f.id = l2.film_id " +
+                "group by f.id " +
+                "order by count(l2.user_id) desc " +
                 "limit ?";
         return jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToFilm, count);
     }

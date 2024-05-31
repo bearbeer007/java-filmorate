@@ -15,10 +15,6 @@ public interface FilmStorage {
 
     Optional<Film> findFilmById(Long id);
 
-    Film addLike(Long filmId, Long userId);
-
-    void deleteLike(Long filmId, Long userId);
-
     List<Film> getPopularFilms(Long count);
 
     void addGenreToFilm(Long filmId, Integer genreId);
