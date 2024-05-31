@@ -8,8 +8,10 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.services.interfaces.*;
-import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.interfaces.LikesStorage;
+import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.GenreDbStorage;
+import ru.yandex.practicum.filmorate.storage.LikesDbStorage;
+import ru.yandex.practicum.filmorate.storage.MpaDbStorage;
 
 import java.util.HashSet;
 import java.util.List;
@@ -18,17 +20,18 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class FilmServiceImpl implements FilmService {
-    private final FilmStorage filmStorage;
-    private final UserService userService;
-    private final MpaService mpaService;
-    private final GenreService genreService;
-    //private final LikesService likesService;
-    private final LikesStorage likesStorage;
+
+
+    private final FilmDbStorage filmDbStorage;
+    private final MpaDbStorage mpaService;
+    private final GenreDbStorage genreService;
+    private final LikesDbStorage likesStorage;
+
 
     @Override
     public Film addFilm(Film film) {
         mpaIds(film);
-        Film createdFilm = filmStorage.addFilm(film);
+        Film createdFilm = filmDbStorage.addFilm(film);
         if (film.getLikeIds() == null) {
             film.setLikeIds(new HashSet<>());
         }
@@ -42,13 +45,13 @@ public class FilmServiceImpl implements FilmService {
                     .stream()
                     .map(Genre::getId)
                     .collect(Collectors.toList());
-            filmStorage.addGenresToFilm(film.getId(), films);
+            filmDbStorage.addGenresToFilm(film.getId(), films);
         }
         return createdFilm;
     }
 
     private void mpaIds(Film film) {
-        var mpaIds = mpaService.getAllMpaRatings().stream().map(Mpa::getId).collect(Collectors.toList());
+        var mpaIds = mpaService.getAllRatings().stream().map(Mpa::getId).collect(Collectors.toList());
         if (!mpaIds.contains(film.getMpa().getId())) {
             throw new BadRequestException("Передан не существующий рейтинг Mpa.");
         }
@@ -72,7 +75,7 @@ public class FilmServiceImpl implements FilmService {
     @Override
     public Film updateFilm(Film film) {
         mpaIds(film);
-        Film updatedFilm = filmStorage.updateFilm(film);
+        Film updatedFilm = filmDbStorage.updateFilm(film);
 
         if (film.getLikeIds() != null) {
             for (Long likeId : film.getLikeIds()) {
@@ -83,7 +86,7 @@ public class FilmServiceImpl implements FilmService {
         if (film.getGenres() != null) {
             List<Integer> genresIds = film.getGenres().stream().map(Genre::getId).collect(Collectors.toList());
             if (!genresIds.isEmpty()) {
-                filmStorage.addGenresToFilm(film.getId(), genresIds);
+                filmDbStorage.addGenresToFilm(film.getId(), genresIds);
             }
         }
         return updatedFilm;
@@ -91,30 +94,35 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> getAllFilms() {
-        return filmStorage.getAllFilms();
+        return filmDbStorage.getAllFilms();
     }
 
     @Override
     public Film getFilmById(Long id) {
-        Film film = filmStorage.findFilmById(id).orElseThrow(
-                () -> new NotFoundException(String.format("Фильм с таким id: %s, отсутствует", id)));
+        Film film = filmDbStorage.findFilmById(id).orElseThrow(
+                () -> new NotFoundException(String.format("Фильм с таким id: %s, отсутствует", id))
+        );
+
+        Mpa mpa = mpaService.findRatingByFilmId(id).orElseThrow(
+                () -> new NotFoundException(String.format("Рейтинг для фильма с id: %s, отсутствует", id))
+        );
+
         return Film.builder()
                 .id(film.getId())
                 .name(film.getName())
                 .duration(film.getDuration())
                 .description(film.getDescription())
                 .releaseDate(film.getReleaseDate())
-                .mpa(mpaService.getRatingByFilmId(id))
+                .mpa(mpa)
                 .likeIds(likesStorage.getLikes(film.getId()))
                 .genres(genreService.getAllGenresByFilm(film.getId()))
                 .build();
     }
 
 
-
     @Override
     public List<Film> getPopularFilms(Long size) {
-        return filmStorage.getPopularFilms(size);
+        return filmDbStorage.getPopularFilms(size);
     }
 
 }
