@@ -13,5 +13,11 @@ public interface FilmStorage {
 
     List<Film> getAllFilms();
 
-    Optional<Film> getFilmById(Long id);
+    Optional<Film> findFilmById(Long id);
+
+    List<Film> getPopularFilms(Long count);
+
+    void addGenreToFilm(Long filmId, Integer genreId);
+
+    void addGenresToFilm(Long filmId, List<Integer> genreIds);
 }
