@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.*;
-import lombok.Builder;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.validator.interfaces.ValidReleaseDate;
 

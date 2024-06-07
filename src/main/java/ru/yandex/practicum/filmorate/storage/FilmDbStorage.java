@@ -13,7 +13,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.ListFilmExtractor;
-import ru.yandex.practicum.filmorate.storage.mapper.MapRowClass;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
