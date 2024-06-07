@@ -27,6 +27,7 @@ public class FilmServiceImpl implements FilmService {
     private final GenreDbStorage genreService;
     private final LikesDbStorage likesStorage;
 
+
     @Override
     public Film addFilm(Film film) {
         mpaIds(film);
@@ -44,7 +45,7 @@ public class FilmServiceImpl implements FilmService {
                     .stream()
                     .map(Genre::getId)
                     .collect(Collectors.toList());
-            filmDbStorage.addGenresToFilm(film.getId(), film.getGenres().stream().toList());
+            filmDbStorage.addGenresToFilm(film.getId(), films);
         }
         return createdFilm;
     }
@@ -85,7 +86,7 @@ public class FilmServiceImpl implements FilmService {
         if (film.getGenres() != null) {
             List<Integer> genresIds = film.getGenres().stream().map(Genre::getId).collect(Collectors.toList());
             if (!genresIds.isEmpty()) {
-                filmDbStorage.addGenresToFilm(film.getId(), film.getGenres().stream().toList());
+                filmDbStorage.addGenresToFilm(film.getId(), genresIds);
             }
         }
         return updatedFilm;
@@ -98,10 +99,24 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public Film getFilmById(Long id) {
-        return filmDbStorage.findFilmById(id).orElseThrow(
+        Film film = filmDbStorage.findFilmById(id).orElseThrow(
                 () -> new NotFoundException(String.format("Фильм с таким id: %s, отсутствует", id))
         );
 
+        Mpa mpa = mpaService.findRatingByFilmId(id).orElseThrow(
+                () -> new NotFoundException(String.format("Рейтинг для фильма с id: %s, отсутствует", id))
+        );
+
+        return Film.builder()
+                .id(film.getId())
+                .name(film.getName())
+                .duration(film.getDuration())
+                .description(film.getDescription())
+                .releaseDate(film.getReleaseDate())
+                .mpa(mpa)
+                .likeIds(likesStorage.getLikes(film.getId()))
+                .genres(genreService.getAllGenresByFilm(film.getId()))
+                .build();
     }
 
 

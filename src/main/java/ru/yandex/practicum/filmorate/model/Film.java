@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.*;
+import lombok.Builder;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.validator.interfaces.ValidReleaseDate;
 
@@ -11,6 +12,7 @@ import java.util.Set;
 
 
 @Data
+@Builder(toBuilder = true)
 public class Film {
 
     private Long id;
