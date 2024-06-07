@@ -1,3 +1,6 @@
+DROP TABLE IF EXISTS
+    film_genres, films, genres, like_films, ratings, users, users_friendship;
+
 CREATE TABLE IF NOT EXISTS ratings (
                                        id SERIAL PRIMARY KEY,
                                        name VARCHAR(10) NOT NULL
@@ -16,14 +19,17 @@ CREATE TABLE IF NOT EXISTS films (
     duration INT NOT NULL,
     rating_mpa_id INT,
     CONSTRAINT films_ratings_fk FOREIGN KEY (rating_mpa_id) REFERENCES ratings(id)
+    on update cascade on delete cascade
     );
 
 CREATE TABLE IF NOT EXISTS film_genres (
                                            genre_id INT NOT NULL,
                                            film_id INT NOT NULL,
                                            CONSTRAINT film_genres_pk PRIMARY KEY (genre_id, film_id),
-    CONSTRAINT film_genres_films_fk FOREIGN KEY (film_id) REFERENCES films(id),
+    CONSTRAINT film_genres_films_fk FOREIGN KEY (film_id) REFERENCES films(id)
+    on update cascade on delete cascade,
     CONSTRAINT film_genres_genres_fk FOREIGN KEY (genre_id) REFERENCES genres(id)
+    on update cascade on delete cascade
     );
 
 CREATE TABLE IF NOT EXISTS users (
@@ -38,16 +44,20 @@ CREATE TABLE IF NOT EXISTS users_friendship (
                                                 user_id INT NOT NULL,
                                                 friend_id INT NOT NULL,
                                                 CONSTRAINT users_friendship_pk PRIMARY KEY (user_id, friend_id),
-    CONSTRAINT users_friendship_users_fk FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT users_friendship_users_fk FOREIGN KEY (user_id) REFERENCES users(id)
+    on update cascade on delete cascade,
     CONSTRAINT users_friendship_users_fk_1 FOREIGN KEY (friend_id) REFERENCES users(id)
+    on update cascade on delete cascade
     );
 
 CREATE TABLE IF NOT EXISTS like_films (
                                           film_id INT NOT NULL,
                                           user_id INT NOT NULL,
                                           CONSTRAINT like_films_pk PRIMARY KEY (film_id, user_id),
-    CONSTRAINT like_films_films_fk FOREIGN KEY (film_id) REFERENCES films(id),
+    CONSTRAINT like_films_films_fk FOREIGN KEY (film_id) REFERENCES films(id)
+    on update cascade on delete cascade,
     CONSTRAINT like_films_users_fk FOREIGN KEY (user_id) REFERENCES users(id)
+    on update cascade on delete cascade
     );
 
 

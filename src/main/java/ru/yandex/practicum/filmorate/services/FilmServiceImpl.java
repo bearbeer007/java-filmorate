@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.services.interfaces.*;
+import ru.yandex.practicum.filmorate.services.interfaces.FilmService;
 import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.GenreDbStorage;
 import ru.yandex.practicum.filmorate.storage.LikesDbStorage;
@@ -125,4 +125,8 @@ public class FilmServiceImpl implements FilmService {
         return filmDbStorage.getPopularFilms(size);
     }
 
+    @Override
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        return filmDbStorage.getCommonFilms(userId, friendId);
+    }
 }

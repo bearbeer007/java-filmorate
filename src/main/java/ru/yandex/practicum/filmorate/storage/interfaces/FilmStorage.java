@@ -5,6 +5,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.util.List;
 import java.util.Optional;
 
+
 public interface FilmStorage {
 
     Film addFilm(Film film);
@@ -20,4 +21,6 @@ public interface FilmStorage {
     void addGenreToFilm(Long filmId, Integer genreId);
 
     void addGenresToFilm(Long filmId, List<Integer> genreIds);
+
+    List<Film> getCommonFilms(Long userId, Long friendId);
 }

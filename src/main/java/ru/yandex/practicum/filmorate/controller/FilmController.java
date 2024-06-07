@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.services.interfaces.FilmService;
 import ru.yandex.practicum.filmorate.services.interfaces.LikesService;
 
-
 import java.util.List;
 
 
@@ -59,6 +58,14 @@ public class FilmController {
     @GetMapping(value = "/popular")
     public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") @Positive Long count) {
         return filmService.getPopularFilms(count);
+    }
+
+    @GetMapping("/common")
+    public List<Film> getCommonsFilms(
+            @RequestParam(value = "userId") Long userId,
+            @RequestParam(value = "friendId") Long friendId
+    ) {
+        return filmService.getCommonFilms(userId, friendId);
     }
 
 }

@@ -12,6 +12,8 @@ import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -22,6 +24,8 @@ import java.util.Optional;
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private final UserDbStorage userDbStorage;
+    private final GenreDbStorage genreDbStorage;
 
     @Override
     public Film addFilm(Film film) {
@@ -125,4 +129,30 @@ public class FilmDbStorage implements FilmStorage {
         values.setLength(values.length() - 1);
         jdbcTemplate.update(sqlQuery + values);
     }
+
+    @Override
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        userDbStorage.findUserById(userId);
+        userDbStorage.findUserById(friendId);
+
+        String sqlQuery = " SELECT f.ID, f.NAME, f.DESCRIPTION, f.RELEASE_DATE, f.DURATION," +
+                "f.RATING_MPA_ID, rat.NAME AS mpa_name" +
+                " FROM films AS f " +
+                "JOIN RATINGS AS rat ON rat.ID = f.RATING_MPA_ID " +
+                "JOIN LIKE_FILMS AS l ON f.ID = l.FILM_ID " +
+                "JOIN LIKE_FILMS AS lf ON l.FILM_ID = lf.FILM_ID " +
+                "WHERE l.USER_ID = ? and lf.USER_ID = ?";
+
+        return jdbcTemplate.query(sqlQuery, this::getFilmsWithGenres, userId, friendId);
+
+    }
+
+    public Film getFilmsWithGenres(ResultSet resultSet, int rowNum) throws SQLException {
+        Film film = MapRowClass.mapRowToFilm(resultSet, rowNum);
+        film.setGenres(genreDbStorage.getAllGenresByFilm(resultSet.getLong("id")));
+        return film;
+
+    }
+
+
 }
