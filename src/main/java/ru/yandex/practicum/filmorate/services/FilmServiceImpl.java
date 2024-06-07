@@ -26,8 +26,6 @@ public class FilmServiceImpl implements FilmService {
     private final MpaDbStorage mpaService;
     private final GenreDbStorage genreService;
     private final LikesDbStorage likesStorage;
-    private final GenreDbStorage genreDbStorage;
-
 
     @Override
     public Film addFilm(Film film) {
@@ -108,8 +106,8 @@ public class FilmServiceImpl implements FilmService {
 
 
     @Override
-    public List<Film> getPopularFilms(Long size, Integer genre_id, Integer year) {
-        return filmDbStorage.getPopularFilms(size, genre_id, year);
+    public List<Film> getPopularFilms(Long size, Integer genreId, Integer year) {
+        return filmDbStorage.getPopularFilms(size, genreId, year);
     }
 
 }
