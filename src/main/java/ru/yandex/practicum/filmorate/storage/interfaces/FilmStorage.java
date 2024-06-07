@@ -20,4 +20,6 @@ public interface FilmStorage {
     void addGenreToFilm(Long filmId, Integer genreId);
 
     void addGenresToFilm(Long filmId, List<Integer> genreIds);
+
+    void deleteFilm(Long id);
 }

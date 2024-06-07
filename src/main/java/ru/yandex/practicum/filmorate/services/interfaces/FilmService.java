@@ -14,4 +14,6 @@ public interface FilmService {
     Film getFilmById(Long id);
 
     List<Film> getPopularFilms(Long count);
+
+    void deleteFilm(Long id);
 }

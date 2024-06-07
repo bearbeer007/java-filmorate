@@ -49,6 +49,7 @@ public class ErrorHandler {
         return new ErrorResponse("Произошла непредвиденная ошибка.");
     }
 
+
     private static class ErrorResponse {
         String error;
 
