@@ -27,7 +27,7 @@ public class ListFilmExtractor implements ResultSetExtractor<List<Film>> {
                 film.setDescription(rs.getString("description"));
                 film.setReleaseDate(rs.getDate("release_date").toLocalDate());
                 film.setDuration(rs.getInt("duration"));
-                film.setMpa(Mpa.builder().id(rs.getInt("mpa_id")).name( rs.getString("mpa_name")).build());
+                film.setMpa(Mpa.builder().id(rs.getInt("mpa_id")).name(rs.getString("mpa_name")).build());
                 film.setGenres(new HashSet<>());
 
                 filmMap.put(filmId, film);
