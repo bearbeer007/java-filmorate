@@ -8,11 +8,11 @@ import ru.yandex.practicum.filmorate.validator.interfaces.ValidReleaseDate;
 
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 
 @Data
-@Builder(toBuilder = true)
 public class Film {
 
     private Long id;
@@ -26,9 +26,8 @@ public class Film {
     @Positive
     @NotNull
     private Integer duration;
-    @JsonIgnore
-    private Set<Long> likeIds;
-    private Set<Genre> genres;
+    private Set<Long> likeIds = new HashSet<>();
+    private Set<Genre> genres = new HashSet<>();
     @NotNull
     private Mpa mpa;
 }

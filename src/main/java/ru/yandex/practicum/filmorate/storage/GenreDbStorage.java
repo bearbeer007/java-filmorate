@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.interfaces.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.mapper.MapRowClass;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;

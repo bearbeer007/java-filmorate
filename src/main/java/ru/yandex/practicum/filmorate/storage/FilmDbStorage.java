@@ -3,15 +3,21 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.mapper.ListFilmExtractor;
+import ru.yandex.practicum.filmorate.storage.mapper.MapRowClass;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -22,6 +28,17 @@ import java.util.Optional;
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
+
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+    private final String sqlGetAll = "select f.id, f.name, f.description, f.release_date, f.duration, " +
+            "m.id as mpa_id, m.name as mpa_name, g.id as genre_id, g.name as genre_name, l.USER_ID " +
+            "from films f " +
+            "left join RATINGS m on f.rating_mpa_id = m.id " +
+            "left join film_genres fg on f.id = fg.film_id " +
+            "left join genres g on fg.genre_id = g.id " +
+            "left join like_films l on f.id = l.film_id " +
+            "GROUP BY f.id, g.id, l.USER_ID ORDER BY f.id";
 
     @Override
     public Film addFilm(Film film) {
@@ -61,52 +78,40 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getAllFilms() {
-        String sqlQuery = "select f.*, " +
-                "m.id as mpa_id, m.name as mpa_name, " +
-                "group_concat(g.id) as genre_ids, group_concat(g.name) as genre_names, " +
-                "count(l.user_id) as likes " +
-                "from films f " +
-                "left join RATINGS m on f.rating_mpa_id = m.id " +
-                "left join film_genres fg on f.id = fg.film_id " +
-                "left join genres g on fg.genre_id = g.id " +
-                "left join like_films l on f.id = l.film_id " +
-                "group by f.id, m.id";
-        ;
-        return jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToFilm);
+        return jdbcTemplate.query(sqlGetAll, new ListFilmExtractor());
     }
 
     @Override
     public Optional<Film> findFilmById(Long id) {
-        String sqlQuery = "select f.*, " +
-                "m.id as mpa_id, m.name as mpa_name, " +
-                "group_concat(g.id) as genre_ids, group_concat(g.name) as genre_names, " +
-                "count(l.user_id) as likes " +
+        String sqlGetById = "select f.*, " +
+                "m.id as mpa_id, m.name as mpa_name, g.id as genre_id, g.name as genre_name, l.USER_ID " +
                 "from films f " +
                 "left join RATINGS m on f.rating_mpa_id = m.id " +
                 "left join film_genres fg on f.id = fg.film_id " +
                 "left join genres g on fg.genre_id = g.id " +
                 "left join like_films l on f.id = l.film_id " +
                 "where f.id =?" +
-                "group by f.id, m.id";
+                "group by f.id, g.id, l.USER_ID";
 
-        Film film = jdbcTemplate.queryForObject(sqlQuery, MapRowClass::mapRowToFilm, id);
+        Film film = Objects.requireNonNull(jdbcTemplate.query(sqlGetById, new ListFilmExtractor(), id)).getFirst();
         return Optional.ofNullable(film);
 
     }
 
     @Override
-    public List<Film> getPopularFilms(Long count) {
-        String sqlQuery = "select f.id, f.name, f.description, f.release_date, f.duration " +
-                "from films f " +
-                "join like_films l1 on f.id = l1.film_id " +
-                "left join RATINGS m on f.rating_mpa_id = m.id " +
-                "left join film_genres fg on f.id = fg.film_id " +
-                "left join genres g on fg.genre_id = g.id " +
-                "left join like_films l2 on f.id = l2.film_id " +
-                "group by f.id " +
-                "order by count(l2.user_id) desc " +
-                "limit ?";
-        return jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToFilm, count);
+    public List<Film> getPopularFilms(Long count, Integer genre, Integer year) {
+        if (genre != null && year != null) {
+            return Objects.requireNonNull(jdbcTemplate.query(sqlGetAll, new ListFilmExtractor())).stream().sorted((Film x, Film x1) -> x1.getLikeIds().size() - x.getLikeIds().size()).filter(x -> x.getReleaseDate().getYear() == year && x.getGenres().stream().anyMatch(y -> Objects.equals(y.getId(), genre))).toList();
+        }
+        if (genre != null) {
+            return Objects.requireNonNull(jdbcTemplate.query(sqlGetAll, new ListFilmExtractor())).stream().sorted((Film x, Film x1) -> x1.getLikeIds().size() - x.getLikeIds().size()).filter(x -> x.getGenres().stream().anyMatch(y -> Objects.equals(y.getId(), genre))).toList();
+
+        }
+        if (year != null) {
+            return Objects.requireNonNull(jdbcTemplate.query(sqlGetAll, new ListFilmExtractor())).stream().sorted((Film x, Film x1) -> x1.getLikeIds().size() - x.getLikeIds().size()).filter(x -> x.getReleaseDate().getYear() == year).toList();
+
+        }
+        return Objects.requireNonNull(jdbcTemplate.query(sqlGetAll, new ListFilmExtractor())).stream().sorted((Film x, Film x1) -> x1.getLikeIds().size() - x.getLikeIds().size()).limit(count).toList();
     }
 
     @Override
@@ -116,13 +121,16 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void addGenresToFilm(Long filmId, List<Integer> genreIds) {
-        String sqlQuery = "insert into film_genres (film_id, genre_id) values";
-        StringBuilder values = new StringBuilder();
-        for (Integer genreId : genreIds) {
-            values.append("(").append(filmId).append(",").append(genreId).append("),");
+    public void addGenresToFilm(Long filmId, List<Genre> genres) {
+        String addGenresQuery = "INSERT INTO film_genres (film_id, genre_id) VALUES (:film_id, :genre_id)";
+
+        List<MapSqlParameterSource> batchParams = new ArrayList<>();
+        for (Genre genre : genres) {
+            MapSqlParameterSource params = new MapSqlParameterSource()
+                    .addValue("film_id", filmId)
+                    .addValue("genre_id", genre.getId());
+            batchParams.add(params);
         }
-        values.setLength(values.length() - 1);
-        jdbcTemplate.update(sqlQuery + values);
+        namedParameterJdbcTemplate.batchUpdate(addGenresQuery, batchParams.toArray(new MapSqlParameterSource[0]));
     }
 }
