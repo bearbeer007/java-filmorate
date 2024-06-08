@@ -97,57 +97,36 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getPopularFilms(Long count, Integer genreId, Integer year) {
-        if (genreId != null && year != null) {
-            String sqlQuery = "select f.id, f.name, f.description, f.release_date, f.duration " +
-                    "from films f " +
-                    "join like_films l1 on f.id = l1.film_id " +
-                    "left join RATINGS m on f.rating_mpa_id = m.id " +
-                    "left join film_genres fg on f.id = fg.film_id " +
-                    "left join genres g on fg.genre_id = g.id " +
-                    "left join like_films l2 on f.id = l2.film_id " +
-                    "where YEAR(f.release_date) = ? AND g.id = ?" +
-                    "group by f.id " +
-                    "order by count(l2.user_id) desc ";
-            return jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToFilm, year, genreId);
-        }
-        if (genreId != null) {
-            String sqlQuery = "select f.id, f.name, f.description, f.release_date, f.duration " +
-                    "from films f " +
-                    "join like_films l1 on f.id = l1.film_id " +
-                    "left join RATINGS m on f.rating_mpa_id = m.id " +
-                    "left join film_genres fg on f.id = fg.film_id " +
-                    "left join genres g on fg.genre_id = g.id " +
-                    "left join like_films l2 on f.id = l2.film_id " +
-                    "where g.id = ?" +
-                    "group by f.id " +
-                    "order by count(l2.user_id) desc ";
-            return jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToFilm, genreId);
-        }
-        if (year != null) {
-            String sqlQuery = "select f.id, f.name, f.description, f.release_date, f.duration " +
-                    "from films f " +
-                    "join like_films l1 on f.id = l1.film_id " +
-                    "left join RATINGS m on f.rating_mpa_id = m.id " +
-                    "left join film_genres fg on f.id = fg.film_id " +
-                    "left join genres g on fg.genre_id = g.id " +
-                    "left join like_films l2 on f.id = l2.film_id " +
-                    "where YEAR(f.release_date) = ? " +
-                    "group by f.id " +
-                    "order by count(l2.user_id) desc ";
-            return jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToFilm, year);
-        }
-
         String sqlQuery = "select f.id, f.name, f.description, f.release_date, f.duration " +
                 "from films f " +
                 "join like_films l1 on f.id = l1.film_id " +
                 "left join RATINGS m on f.rating_mpa_id = m.id " +
                 "left join film_genres fg on f.id = fg.film_id " +
                 "left join genres g on fg.genre_id = g.id " +
-                "left join like_films l2 on f.id = l2.film_id " +
-                "group by f.id " +
+                "left join like_films l2 on f.id = l2.film_id ";
+        if (genreId != null && year != null) {
+            String sqlAdd = "where YEAR(f.release_date) = ? AND g.id = ?" +
+                    "group by f.id " +
+                    "order by count(l2.user_id) desc ";
+            return jdbcTemplate.query(sqlQuery + sqlAdd, MapRowClass::mapRowToFilm, year, genreId);
+        }
+        if (genreId != null) {
+            String sqlAdd = "where g.id = ?" +
+                    "group by f.id " +
+                    "order by count(l2.user_id) desc ";
+            return jdbcTemplate.query(sqlQuery + sqlAdd, MapRowClass::mapRowToFilm, genreId);
+        }
+        if (year != null) {
+            String sqlAdd = "where YEAR(f.release_date) = ? " +
+                    "group by f.id " +
+                    "order by count(l2.user_id) desc ";
+            return jdbcTemplate.query(sqlQuery + sqlAdd, MapRowClass::mapRowToFilm, year);
+        }
+
+        String sqlAdd = "group by f.id " +
                 "order by count(l2.user_id) desc " +
                 "limit ?";
-        return jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToFilm, count);
+        return jdbcTemplate.query(sqlQuery + sqlAdd, MapRowClass::mapRowToFilm, count);
     }
 
     @Override
