@@ -8,15 +8,14 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -24,8 +23,6 @@ import java.util.Optional;
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private final UserDbStorage userDbStorage;
-    private final GenreDbStorage genreDbStorage;
 
     @Override
     public Film addFilm(Film film) {
@@ -132,8 +129,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getCommonFilms(Long userId, Long friendId) {
-        userDbStorage.findUserById(userId);
-        userDbStorage.findUserById(friendId);
 
         String sqlQuery = " SELECT f.ID, f.NAME, f.DESCRIPTION, f.RELEASE_DATE, f.DURATION," +
                 "f.RATING_MPA_ID, rat.NAME AS mpa_name" +
@@ -149,10 +144,16 @@ public class FilmDbStorage implements FilmStorage {
 
     public Film getFilmsWithGenres(ResultSet resultSet, int rowNum) throws SQLException {
         Film film = MapRowClass.mapRowToFilm(resultSet, rowNum);
-        film.setGenres(genreDbStorage.getAllGenresByFilm(resultSet.getLong("id")));
+        film.setGenres(getAllFilmGenresById(resultSet.getLong("id")));
         return film;
 
     }
+    public Set<Genre> getAllFilmGenresById(Long id) {
+        String sqlQuery = "select * from genres where id in " +
+                "(select genre_id from film_genres where film_id = ?)";
+        return new HashSet<>(jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToGenre, id));
+    }
+
 
 
 }
