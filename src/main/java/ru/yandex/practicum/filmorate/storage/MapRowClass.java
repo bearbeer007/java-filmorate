@@ -12,7 +12,6 @@ import java.sql.SQLException;
 
 
 @Component
-@RequiredArgsConstructor
 public class MapRowClass {
 
     public static Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
