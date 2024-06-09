@@ -74,4 +74,13 @@ public class UserDbStorage implements UserStorage {
         values.put("birthday", user.getBirthday());
         return values;
     }
+
+    @Override
+    public boolean contains(Long id) {
+        final String sql = "SELECT EXISTS(SELECT id " +
+                "FROM USERS " +
+                "WHERE id = ?);";
+        final Boolean isExists = jdbcTemplate.queryForObject(sql, Boolean.class, id);
+        return isExists;
+    }
 }

@@ -15,4 +15,6 @@ public interface UserStorage {
 
     Optional<User> findUserById(Long id);
 
+    boolean contains(Long id);
+
 }
