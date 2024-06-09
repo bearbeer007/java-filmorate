@@ -148,12 +148,12 @@ public class FilmDbStorage implements FilmStorage {
         return film;
 
     }
+
     public Set<Genre> getAllFilmGenresById(Long id) {
         String sqlQuery = "select * from genres where id in " +
                 "(select genre_id from film_genres where film_id = ?)";
         return new HashSet<>(jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToGenre, id));
     }
-
 
 
 }
