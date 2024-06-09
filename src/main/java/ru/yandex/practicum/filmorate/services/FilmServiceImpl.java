@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.GenreDbStorage;
 import ru.yandex.practicum.filmorate.storage.LikesDbStorage;
 import ru.yandex.practicum.filmorate.storage.MpaDbStorage;
+import ru.yandex.practicum.filmorate.storage.interfaces.EventStorage;
 
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +27,7 @@ public class FilmServiceImpl implements FilmService {
     private final MpaDbStorage mpaService;
     private final GenreDbStorage genreService;
     private final LikesDbStorage likesStorage;
+    private final EventStorage eventStorage;
 
 
     @Override
