@@ -190,14 +190,14 @@ public class FilmDbStorage implements FilmStorage {
 
     }
 
-    public Film getFilmsWithGenres(ResultSet resultSet, int rowNum) throws SQLException {
+    private Film getFilmsWithGenres(ResultSet resultSet, int rowNum) throws SQLException {
         Film film = MapRowClass.mapRowToFilm(resultSet, rowNum);
         film.setGenres(getAllFilmGenresById(resultSet.getLong("id")));
         return film;
 
     }
 
-    public Set<Genre> getAllFilmGenresById(Long id) {
+    private Set<Genre> getAllFilmGenresById(Long id) {
         String sqlQuery = "select * from genres where id in " +
                 "(select genre_id from film_genres where film_id = ?)";
         return new HashSet<>(jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToGenre, id));
