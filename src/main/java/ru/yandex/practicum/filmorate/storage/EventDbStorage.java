@@ -38,8 +38,8 @@ public class EventDbStorage implements EventStorage {
         jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
             stmt.setLong(1, event.getUserId());
-            stmt.setString(2, event.getEventType().toString());
-            stmt.setString(3, event.getOperation().toString());
+            stmt.setString(2, event.getEventType().name());
+            stmt.setString(3, event.getOperation().name());
             stmt.setLong(4, event.getEntityId());
             return stmt;
         }, keyHolder);
