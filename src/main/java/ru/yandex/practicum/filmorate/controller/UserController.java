@@ -70,7 +70,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/feed")
-    public List<Event> getEventsOfUser(@PathVariable(name = "id") int userId) {
+    public List<Event> getEventsOfUser(@PathVariable(name = "id") Long userId) {
         log.info(String.format("GET /users/{id}/feed, {id} = %s", userId));
         return userService.getEvents(userId);
     }
