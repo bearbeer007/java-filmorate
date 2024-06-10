@@ -23,8 +23,7 @@ public class EventDbStorage implements EventStorage {
     public List<Event> getEventsByUserId(Long id) {
         String sql = "SELECT id, last_update, id_user, event_type, operation, entity_id " +
                 "FROM events " +
-                "WHERE id_user = ?" +
-                "limit 7";
+                "WHERE id_user = ?";
 
         return jdbcTemplate.query(sql, MapRowClass::mapRowToEvent, id);
     }

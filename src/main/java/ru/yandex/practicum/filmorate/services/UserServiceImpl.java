@@ -72,12 +72,4 @@ public class UserServiceImpl implements UserService {
         checkUserExistsWithException(id, "Нет пользователя " +id);
     }
 
-    private void checkFriendExists(Long id) {
-        checkUserExistsWithException(id, "Нет пользователя " +id);
-    }
-
-    private void checkOtherUserExists(Long id) {
-        checkUserExistsWithException(id, String.format("Нет пользователя (с кем должны быть общие друзья) с id = %s", id));
-    }
-
 }
