@@ -98,9 +98,11 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
+
     @Override
     public List<Film> getPopularFilms(Long count, Integer genreId, Integer year) {
-        String sqlQuery = "select f.id, f.name, f.description, f.release_date, f.duration " +
+
+        String sqlQuery = "select f.*" +
                 "from films f " +
                 "join like_films l1 on f.id = l1.film_id " +
                 "left join RATINGS m on f.rating_mpa_id = m.id " +
@@ -126,10 +128,23 @@ public class FilmDbStorage implements FilmStorage {
             return jdbcTemplate.query(sqlQuery + sqlAdd, MapRowClass::mapRowToFilm, year);
         }
 
-        String sqlAdd = "group by f.id " +
-                "order by count(l2.user_id) desc " +
-                "limit ?";
-        return jdbcTemplate.query(sqlQuery + sqlAdd, MapRowClass::mapRowToFilm, count);
+        String sqlJustCount =
+                "select  f.*, rat.name AS mpa_name " +
+                        "FROM films AS f " +
+                        "left join ( " +
+                        "select film_id, count (user_id) AS popular " +
+                        "from like_films AS lf " +
+                        "group by film_id " +
+                        ") as pop on pop.film_id = f.id " +
+                        "left join ( " +
+                        "select * " +
+                        "from ratings as r " +
+                        ") as rat on rat.id = f.rating_mpa_id " +
+                        "order by pop.popular desc " +
+                        "limit ?; ";
+        return jdbcTemplate.query(sqlJustCount, MapRowClass::mapRowToFilm, count);
+
+
     }
 
     @Override
