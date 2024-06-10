@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
 import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.interfaces.EventStorage;
+import ru.yandex.practicum.filmorate.storage.mapper.MapRowClass;
 
 import java.sql.PreparedStatement;
 import java.util.List;

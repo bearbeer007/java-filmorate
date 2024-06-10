@@ -99,7 +99,6 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
-    }
 
     @Override
     public List<Film> getPopularFilms(Long count, Integer genreId, Integer year) {
@@ -175,7 +174,6 @@ public class FilmDbStorage implements FilmStorage {
     }
 
 
-
     @Override
     public List<Film> getCommonFilms(Long userId, Long friendId) {
 
@@ -203,8 +201,6 @@ public class FilmDbStorage implements FilmStorage {
                 "(select genre_id from film_genres where film_id = ?)";
         return new HashSet<>(jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToGenre, id));
     }
-
-
 
 
     @Override
