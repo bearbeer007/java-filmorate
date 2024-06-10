@@ -9,14 +9,15 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.MapRowClass;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -170,6 +171,36 @@ public class FilmDbStorage implements FilmStorage {
                 " where id = ?";
         jdbcTemplate.update(sqlQuery, id);
         log.info("Фильм с id " + id + " успешно удален");
+    }
+
+
+
+    @Override
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+
+        String sqlQuery = " SELECT f.ID, f.NAME, f.DESCRIPTION, f.RELEASE_DATE, f.DURATION," +
+                "f.RATING_MPA_ID, rat.NAME AS mpa_name" +
+                " FROM films AS f " +
+                "JOIN RATINGS AS rat ON rat.ID = f.RATING_MPA_ID " +
+                "JOIN LIKE_FILMS AS l ON f.ID = l.FILM_ID " +
+                "JOIN LIKE_FILMS AS lf ON l.FILM_ID = lf.FILM_ID " +
+                "WHERE l.USER_ID = ? and lf.USER_ID = ?";
+
+        return jdbcTemplate.query(sqlQuery, this::getFilmsWithGenres, userId, friendId);
+
+    }
+
+    public Film getFilmsWithGenres(ResultSet resultSet, int rowNum) throws SQLException {
+        Film film = MapRowClass.mapRowToFilm(resultSet, rowNum);
+        film.setGenres(getAllFilmGenresById(resultSet.getLong("id")));
+        return film;
+
+    }
+
+    public Set<Genre> getAllFilmGenresById(Long id) {
+        String sqlQuery = "select * from genres where id in " +
+                "(select genre_id from film_genres where film_id = ?)";
+        return new HashSet<>(jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToGenre, id));
     }
 
 

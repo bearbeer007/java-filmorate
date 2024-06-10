@@ -8,10 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.services.interfaces.FilmService;
-import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.GenreDbStorage;
-import ru.yandex.practicum.filmorate.storage.LikesDbStorage;
-import ru.yandex.practicum.filmorate.storage.MpaDbStorage;
+import ru.yandex.practicum.filmorate.storage.*;
 
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +23,7 @@ public class FilmServiceImpl implements FilmService {
     private final MpaDbStorage mpaService;
     private final GenreDbStorage genreService;
     private final LikesDbStorage likesStorage;
+    private final UserDbStorage userDbStorage;
 
 
     @Override
@@ -97,7 +95,6 @@ public class FilmServiceImpl implements FilmService {
         return filmDbStorage.getAllFilms();
     }
 
-
     @Override
     public Film getFilmById(Long id) {
         Film film = filmDbStorage.findFilmById(id).orElseThrow(
@@ -129,5 +126,11 @@ public class FilmServiceImpl implements FilmService {
     @Override
     public void deleteFilm(Long id) {
         filmDbStorage.deleteFilm(id);
+    }
+    @Override
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        userDbStorage.findUserById(userId);
+        userDbStorage.findUserById(friendId);
+        return filmDbStorage.getCommonFilms(userId, friendId);
     }
 }

@@ -22,4 +22,6 @@ public interface FilmStorage {
     void addGenresToFilm(Long filmId, List<Integer> genreIds);
 
     void deleteFilm(Long id);
+
+    List<Film> getCommonFilms(Long userId, Long friendId);
 }
