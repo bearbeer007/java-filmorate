@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -62,17 +63,17 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getAllFilms() {
-        String sqlQuery = "select f.*, " +
-                "m.id as mpa_id, m.name as mpa_name, " +
-                "group_concat(g.id) as genre_ids, group_concat(g.name) as genre_names, " +
-                "count(l.user_id) as likes " +
-                "from films f " +
-                "left join RATINGS m on f.rating_mpa_id = m.id " +
-                "left join film_genres fg on f.id = fg.film_id " +
-                "left join genres g on fg.genre_id = g.id " +
-                "left join like_films l on f.id = l.film_id " +
-                "group by f.id, m.id";
-        ;
+        String sqlQuery = """
+                SELECT f.ID,
+                       f.NAME,
+                       f.DESCRIPTION,
+                       f.RELEASE_DATE,
+                       f.DURATION,
+                       f.RATING_MPA_ID,
+                       r.NAME AS Mpa_name
+                       FROM films AS f
+                       INNER JOIN RATINGS r ON r.ID = f.RATING_MPA_ID
+                        """;
         return jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToFilm);
     }
 
@@ -89,10 +90,12 @@ public class FilmDbStorage implements FilmStorage {
                 "left join like_films l on f.id = l.film_id " +
                 "where f.id =?" +
                 "group by f.id, m.id";
-
-        Film film = jdbcTemplate.queryForObject(sqlQuery, MapRowClass::mapRowToFilm, id);
-        return Optional.ofNullable(film);
-
+        try {
+            Film film = jdbcTemplate.queryForObject(sqlQuery, MapRowClass::mapRowToFilm, id);
+            return Optional.ofNullable(film);
+        } catch (DataAccessException e) {
+            throw new NotFoundException("Id doesn't exist. " + id);
+        }
     }
 
     @Override
@@ -145,4 +148,14 @@ public class FilmDbStorage implements FilmStorage {
         values.setLength(values.length() - 1);
         jdbcTemplate.update(sqlQuery + values);
     }
+
+    @Override
+    public void deleteFilm(Long id) {
+        String sqlQuery = "DELETE FROM FILMS" +
+                " where id = ?";
+        jdbcTemplate.update(sqlQuery, id);
+        log.info("Фильм с id " + id + " успешно удален");
+    }
+
+
 }
