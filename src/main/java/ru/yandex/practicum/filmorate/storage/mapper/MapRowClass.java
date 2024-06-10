@@ -1,10 +1,9 @@
 package ru.yandex.practicum.filmorate.storage.mapper;
 
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.model.enums.EventType;
+import ru.yandex.practicum.filmorate.model.enums.Operation;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -47,4 +46,27 @@ public class MapRowClass {
                 .birthday(resultSet.getDate("birthday").toLocalDate())
                 .build();
     }
+
+    public static Review mapRowToReview(ResultSet resultSet, int rowNum) throws SQLException {
+        return Review.builder()
+                .id(resultSet.getLong("id"))
+                .userId(resultSet.getLong("id_user"))
+                .filmId(resultSet.getLong("id_film"))
+                .content(resultSet.getString("content"))
+                .isPositive(resultSet.getBoolean("isPositive"))
+                .rating(resultSet.getInt("rating"))
+                .build();
+    }
+
+    public static Event mapRowToEvent(ResultSet resultSet, int rowNum) throws SQLException {
+        return Event.builder()
+                .eventId(resultSet.getLong("id"))
+                .entityId(resultSet.getLong("entity_id"))
+                .userId(resultSet.getLong("id_user"))
+                .eventType(EventType.valueOf(resultSet.getString("event_type")))
+                .operation(Operation.valueOf(resultSet.getString("operation")))
+                .timestamp(resultSet.getDate("last_update").getTime())
+                .build();
+    }
+
 }

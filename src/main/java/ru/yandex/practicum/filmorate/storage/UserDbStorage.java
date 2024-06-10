@@ -86,4 +86,13 @@ public class UserDbStorage implements UserStorage {
         }
         log.info("Пользователь с id " + id + " успешно удален");
     }
+
+    @Override
+    public boolean contains(Long id) {
+        final String sql = "SELECT EXISTS(SELECT id " +
+                "FROM USERS " +
+                "WHERE id = ?);";
+        final Boolean isExists = jdbcTemplate.queryForObject(sql, Boolean.class, id);
+        return isExists;
+    }
 }

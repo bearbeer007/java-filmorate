@@ -99,6 +99,7 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
+    }
 
     @Override
     public List<Film> getPopularFilms(Long count, Integer genreId, Integer year) {
@@ -204,4 +205,14 @@ public class FilmDbStorage implements FilmStorage {
     }
 
 
+
+
+    @Override
+    public boolean contains(Long id) {
+        final String sql = "SELECT EXISTS(SELECT f.id " +
+                "FROM films f " +
+                "WHERE f.id = ?);";
+        final Boolean isExists = jdbcTemplate.queryForObject(sql, Boolean.class, id);
+        return isExists;
+    }
 }
