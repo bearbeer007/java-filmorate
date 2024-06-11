@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.services.interfaces.FilmService;
 import ru.yandex.practicum.filmorate.services.interfaces.FriendsService;
 import ru.yandex.practicum.filmorate.services.interfaces.UserService;
 
