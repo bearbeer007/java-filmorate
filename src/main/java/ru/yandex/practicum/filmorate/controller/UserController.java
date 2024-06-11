@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.services.interfaces.FriendsService;
 import ru.yandex.practicum.filmorate.services.interfaces.UserService;
@@ -66,6 +67,12 @@ public class UserController {
                                        @PathVariable("otherId") Long otherId) {
         List<User> commonFriends = friendsService.commonFriends(id, otherId);
         return commonFriends;
+    }
+
+    @GetMapping("/{id}/feed")
+    public List<Event> getEventsOfUser(@PathVariable(name = "id") Long userId) {
+        log.info(String.format("GET /users/{id}/feed, {id} = %s", userId));
+        return userService.getEvents(userId);
     }
 
     @DeleteMapping(value = "/{id}")
