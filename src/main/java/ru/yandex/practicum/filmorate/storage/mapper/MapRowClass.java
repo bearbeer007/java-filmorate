@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.mapper;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.*;
@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.enums.Operation;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 
 @Component
 public class MapRowClass {
@@ -20,6 +21,7 @@ public class MapRowClass {
                 .duration(resultSet.getInt("duration"))
                 .build();
     }
+
 
     public static Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
         return Genre.builder()

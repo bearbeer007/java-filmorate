@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
+import ru.yandex.practicum.filmorate.storage.mapper.MapRowClass;
 
 import java.util.HashMap;
 import java.util.List;
@@ -73,6 +74,17 @@ public class UserDbStorage implements UserStorage {
         values.put("name", user.getName());
         values.put("birthday", user.getBirthday());
         return values;
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        String sqlQuery = "DELETE FROM users" +
+                " where id = ?";
+        int update = jdbcTemplate.update(sqlQuery, id);
+        if (update == 0) {
+            throw new NotFoundException("Пользователь с id =  " + id + " не найден");
+        }
+        log.info("Пользователь с id " + id + " успешно удален");
     }
 
     @Override

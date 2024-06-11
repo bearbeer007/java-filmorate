@@ -15,4 +15,6 @@ public interface UserService {
     User getUserById(Long id);
 
     List<Event> getEvents(Long id);
+
+    void deleteUser(Long id);
 }

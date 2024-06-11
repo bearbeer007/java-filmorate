@@ -74,4 +74,9 @@ public class UserController {
         log.info(String.format("GET /users/{id}/feed, {id} = %s", userId));
         return userService.getEvents(userId);
     }
+
+    @DeleteMapping(value = "/{id}")
+    public void deleteUserById(@PathVariable("id") Long id) {
+        userService.deleteUser(id);
+    }
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.interfaces.MpaStorage;
+import ru.yandex.practicum.filmorate.storage.mapper.MapRowClass;
 
 import java.util.List;
 import java.util.Optional;

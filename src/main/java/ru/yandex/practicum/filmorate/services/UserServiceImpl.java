@@ -9,7 +9,7 @@ import ru.yandex.practicum.filmorate.services.interfaces.UserService;
 import ru.yandex.practicum.filmorate.storage.interfaces.EventStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
-import java.util.*;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -72,4 +72,8 @@ public class UserServiceImpl implements UserService {
         checkUserExistsWithException(id, "Нет пользователя " +id);
     }
 
+    @Override
+    public void deleteUser(Long id) {
+        userStorage.deleteUser(id);
+    }
 }
