@@ -211,4 +211,28 @@ public class FilmDbStorage implements FilmStorage {
         final Boolean isExists = jdbcTemplate.queryForObject(sql, Boolean.class, id);
         return isExists;
     }
+
+    @Override
+    public List<Long> findSimilarUsersByLikes(Long userId) {
+        String sql = "SELECT lf1.user_id, COUNT(*) AS common_likes " +
+                "FROM like_films AS lf1 " +
+                "JOIN like_films AS lf2 ON lf1.film_id = lf2.film_id " +
+                "WHERE lf2.user_id = ? AND lf1.user_id != ? " +
+                "GROUP BY lf1.user_id " +
+                "ORDER BY common_likes DESC";
+
+        return jdbcTemplate.query(sql, new Object[]{userId, userId},
+                (rs, rowNum) -> rs.getLong("user_id"));
+    }
+
+    @Override
+    public List<Film> findRecommendedFilms(Long userId, Long similarUserId) {
+        String sqlQuery = "SELECT * " +
+                "FROM like_films AS lf " +
+                "JOIN films AS f ON lf.film_id = f.id " +
+                "WHERE user_id = ? " +
+                "AND film_id NOT IN (SELECT film_id FROM like_films WHERE user_id = ?)";
+
+        return jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToFilm, similarUserId, userId);
+    }
 }

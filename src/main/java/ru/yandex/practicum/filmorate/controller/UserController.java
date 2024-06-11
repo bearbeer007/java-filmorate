@@ -5,10 +5,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.services.interfaces.FriendsService;
 import ru.yandex.practicum.filmorate.services.interfaces.UserService;
 
+import java.util.Collection;
 import java.util.List;
 
 @RestController
@@ -19,6 +21,7 @@ public class UserController {
 
     private final UserService userService;
     private final FriendsService friendsService;
+    private final FilmService filmService;
 
     @PostMapping
     public User addUser(@Valid @RequestBody User user) {
@@ -78,5 +81,10 @@ public class UserController {
     @DeleteMapping(value = "/{id}")
     public void deleteUserById(@PathVariable("id") Long id) {
         userService.deleteUser(id);
+    }
+
+    @GetMapping("/{id}/recommendations")
+    public Collection<Film> getRecommendFilms(@PathVariable Long id) {
+        return filmService.getRecommendFilms(id);
     }
 }

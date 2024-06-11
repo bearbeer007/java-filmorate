@@ -26,4 +26,8 @@ public interface FilmStorage {
     List<Film> getCommonFilms(Long userId, Long friendId);
 
     boolean contains(Long id);
+
+    List<Long> findSimilarUsersByLikes(Long userId);
+
+    List<Film> findRecommendedFilms(Long userId, Long similarUserId);
 }

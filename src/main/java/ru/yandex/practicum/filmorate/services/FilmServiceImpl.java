@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.*;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -131,5 +132,18 @@ public class FilmServiceImpl implements FilmService {
         userDbStorage.findUserById(userId);
         userDbStorage.findUserById(friendId);
         return filmDbStorage.getCommonFilms(userId, friendId);
+    }
+
+    public Set<Film> getRecommendFilms(Long userId) {
+        userDbStorage.findUserById(userId);
+
+        List<Long> similarUserIds = filmDbStorage.findSimilarUsersByLikes(userId);
+
+        Set<Film> recommendedFilms = new HashSet<>();
+        for (Long similarUserId : similarUserIds) {
+            List<Film> films = filmDbStorage.findRecommendedFilms(userId, similarUserId);
+            recommendedFilms.addAll(films);
+        }
+        return recommendedFilms;
     }
 }

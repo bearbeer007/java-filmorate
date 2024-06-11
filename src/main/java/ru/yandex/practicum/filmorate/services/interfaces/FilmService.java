@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.services.interfaces;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.List;
+import java.util.Set;
 
 public interface FilmService {
     Film addFilm(Film film);
@@ -18,4 +19,6 @@ public interface FilmService {
     void deleteFilm(Long id);
 
     List<Film> getCommonFilms(Long userId, Long friendId);
+
+    Set<Film> getRecommendFilms(Long userId);
 }
