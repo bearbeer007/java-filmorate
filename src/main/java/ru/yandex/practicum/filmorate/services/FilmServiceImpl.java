@@ -143,14 +143,9 @@ public class FilmServiceImpl implements FilmService {
 
         Set<Film> recommendedFilms = new HashSet<>();
         for (Long similarUserId : similarUserIds) {
-            int maxSize = 10;
             List<Film> films = filmDbStorage.findRecommendedFilms(userId, similarUserId);
             recommendedFilms.addAll(films);
-            if (recommendedFilms.size() >= maxSize) {
-                break;
-            }
         }
-
         return recommendedFilms;
     }
 }
