@@ -69,7 +69,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void checkUserExists(Long id) {
-        checkUserExistsWithException(id, "Нет пользователя " +id);
+        checkUserExistsWithException(id, "Нет пользователя " + id);
     }
 
     @Override
