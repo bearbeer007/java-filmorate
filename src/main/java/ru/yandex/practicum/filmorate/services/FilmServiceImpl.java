@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.*;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -127,10 +128,29 @@ public class FilmServiceImpl implements FilmService {
     public void deleteFilm(Long id) {
         filmDbStorage.deleteFilm(id);
     }
+
     @Override
     public List<Film> getCommonFilms(Long userId, Long friendId) {
         userDbStorage.findUserById(userId);
         userDbStorage.findUserById(friendId);
         return filmDbStorage.getCommonFilms(userId, friendId);
+    }
+
+    public Set<Film> getRecommendFilms(Long userId) {
+        userDbStorage.findUserById(userId);
+
+        List<Long> similarUserIds = filmDbStorage.findSimilarUsersByLikes(userId);
+
+        Set<Film> recommendedFilms = new HashSet<>();
+        for (Long similarUserId : similarUserIds) {
+            int maxSize = 10;
+            List<Film> films = filmDbStorage.findRecommendedFilms(userId, similarUserId);
+            recommendedFilms.addAll(films);
+            if (recommendedFilms.size() >= maxSize) {
+                break;
+            }
+        }
+
+        return recommendedFilms;
     }
 }
