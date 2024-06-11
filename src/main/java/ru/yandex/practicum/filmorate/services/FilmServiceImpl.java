@@ -29,7 +29,7 @@ public class FilmServiceImpl implements FilmService {
     private final MpaDbStorage mpaService;
     private final GenreDbStorage genreService;
     private final LikesDbStorage likesStorage;
-
+    private final UserDbStorage userDbStorage;
 
     @Override
     public Film addFilm(Film film) {
@@ -122,10 +122,21 @@ public class FilmServiceImpl implements FilmService {
                 .build();
     }
 
+    @Override
+    public List<Film> getPopularFilms(Long size, Integer genreId, Integer year) {
+        return filmDbStorage.getPopularFilms(size, genreId, year);
+    }
 
     @Override
-    public List<Film> getPopularFilms(Long size) {
-        return filmDbStorage.getPopularFilms(size);
+    public void deleteFilm(Long id) {
+        filmDbStorage.deleteFilm(id);
     }
+    @Override
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        userDbStorage.findUserById(userId);
+        userDbStorage.findUserById(friendId);
+        return filmDbStorage.getCommonFilms(userId, friendId);
+    }
+
 
 }
