@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.exeption.BadRequestException;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.MapRowClass;
 
@@ -78,7 +79,7 @@ public class FilmDbStorage implements FilmStorage {
                        FROM films AS f
                        INNER JOIN RATINGS r ON r.ID = f.RATING_MPA_ID
                         """;
-        return jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToFilm);
+        return jdbcTemplate.query(sqlQuery, this::getFilmsWithGenresAndMpas);
     }
 
     @Override
@@ -145,7 +146,7 @@ public class FilmDbStorage implements FilmStorage {
                         ") as rat on rat.id = f.rating_mpa_id " +
                         "order by pop.popular desc " +
                         "limit ?; ";
-        return jdbcTemplate.query(sqlJustCount, MapRowClass::mapRowToFilm, count);
+        return jdbcTemplate.query(sqlJustCount, this::getFilmsWithGenresAndMpas, count);
     }
 
     @Override
@@ -194,13 +195,29 @@ public class FilmDbStorage implements FilmStorage {
         return film;
 
     }
+    private Film getFilmsWithGenresAndMpas(ResultSet resultSet, int rowNum) throws SQLException {
+        Film film = MapRowClass.mapRowToFilm(resultSet, rowNum);
+        film.setGenres(getAllFilmGenresById(resultSet.getLong("id")));
+        Optional<Mpa> test = findRatingByFilmId(resultSet.getLong("id"));
+        film.setMpa(test.get());
+        return film;
+
+    }
 
     private Set<Genre> getAllFilmGenresById(Long id) {
         String sqlQuery = "select * from genres where id in " +
                 "(select genre_id from film_genres where film_id = ?)";
         return new HashSet<>(jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToGenre, id));
     }
-
+    public Optional<Mpa> findRatingByFilmId(Long id) {
+        String sqlQuery = "select r.id, r.name from films f join ratings r on f.rating_mpa_id = r.id where f.id = ?";
+        try {
+            Mpa mpa = jdbcTemplate.queryForObject(sqlQuery, MapRowClass::mapRowToMpa, id);
+            return Optional.ofNullable(mpa);
+        } catch (DataAccessException e) {
+            throw new NotFoundException("Mpa with film id:" + id + "doesn't exist.");
+        }
+    }
 
     @Override
     public boolean contains(Long id) {

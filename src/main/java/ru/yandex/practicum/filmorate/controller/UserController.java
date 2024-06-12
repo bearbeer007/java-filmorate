@@ -26,15 +26,13 @@ public class UserController {
 
     @PostMapping
     public User addUser(@Valid @RequestBody User user) {
-        log.info("Request body: " + user.toString());
-        log.info("Request body: " + userService.addUser(user).toString());
+          log.info("Request body: " + user.toString());
         return userService.addUser(user);
     }
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
         log.info("Request body: " + user.toString());
-        log.info("Request body: " + userService.updateUser(user).toString());
         return userService.updateUser(user);
     }
 
