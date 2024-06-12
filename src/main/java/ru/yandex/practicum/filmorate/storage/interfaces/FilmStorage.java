@@ -30,4 +30,6 @@ public interface FilmStorage {
     List<Long> findSimilarUsersByLikes(Long userId);
 
     List<Film> findRecommendedFilms(Long userId, Long similarUserId);
+
+    List<Film> searchFilmsByTitleAndDirector(String query, String obj);
 }

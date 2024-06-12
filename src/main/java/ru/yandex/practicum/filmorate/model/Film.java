@@ -30,4 +30,5 @@ public class Film {
     private Set<Genre> genres = new HashSet<>();
     @NotNull
     private Mpa mpa;
+    private Set<Director> directors;
 }

@@ -69,4 +69,10 @@ public class MapRowClass {
                 .build();
     }
 
+    public static Director mapRowToDirector(ResultSet resultSet, int rowNum) throws SQLException {
+        return Director.builder()
+                .id(resultSet.getLong("id"))
+                .name(resultSet.getString("name"))
+                .build();
+    }
 }

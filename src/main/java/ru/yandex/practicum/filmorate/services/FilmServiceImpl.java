@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.services.interfaces.FilmService;
 import ru.yandex.practicum.filmorate.storage.*;
+import ru.yandex.practicum.filmorate.storage.interfaces.DirectorStorage;
 
 import java.util.HashSet;
 import java.util.List;
@@ -19,12 +20,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FilmServiceImpl implements FilmService {
 
-
     private final FilmDbStorage filmDbStorage;
     private final MpaDbStorage mpaService;
     private final GenreDbStorage genreService;
     private final LikesDbStorage likesStorage;
     private final UserDbStorage userDbStorage;
+    private final DirectorStorage directorStorage;
 
     @Override
     public Film addFilm(Film film) {
@@ -145,5 +146,25 @@ public class FilmServiceImpl implements FilmService {
             recommendedFilms.addAll(films);
         }
         return recommendedFilms;
+    }
+
+    @Override
+    public List<Film> getFilmsSortByYearOrLikes(Long id, String obj) {
+        return directorStorage.getFilmsSortByYearOrLikes(id, obj);
+    }
+
+    @Override
+    public List<Film> searchFilmsByTitleAndDirector(String query, String obj) {
+        List<Film> films = filmDbStorage.searchFilmsByTitleAndDirector(query, obj);
+        return films.stream().map(this::getFullFilmObject).collect(Collectors.toList());
+    }
+
+    private Film getFullFilmObject(Film film) {
+        return film.toBuilder()
+                .likeIds(new HashSet<>(likesStorage.getLikes(film.getId())))
+                .mpa(mpaService.findRatingByFilmId(film.getId()).get())
+                .genres(new HashSet<>(genreService.getAllGenresByFilm(film.getId())))
+                .directors(new HashSet<>(directorStorage.getDirectorsFilm(film.getId().longValue())))
+                .build();
     }
 }
