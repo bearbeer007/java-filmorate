@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exeption.BadRequestException;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -18,6 +19,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Component
@@ -99,7 +102,6 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
-
     @Override
     public List<Film> getPopularFilms(Long count, Integer genreId, Integer year) {
 
@@ -144,8 +146,6 @@ public class FilmDbStorage implements FilmStorage {
                         "order by pop.popular desc " +
                         "limit ?; ";
         return jdbcTemplate.query(sqlJustCount, MapRowClass::mapRowToFilm, count);
-
-
     }
 
     @Override
@@ -172,7 +172,6 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update(sqlQuery, id);
         log.info("Фильм с id " + id + " успешно удален");
     }
-
 
     @Override
     public List<Film> getCommonFilms(Long userId, Long friendId) {
@@ -234,5 +233,36 @@ public class FilmDbStorage implements FilmStorage {
                 "AND film_id NOT IN (SELECT film_id FROM like_films WHERE user_id = ?)";
 
         return jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToFilm, similarUserId, userId);
+    }
+
+    @Override
+    public List<Film> searchFilmsByTitleAndDirector(String query, String by) {
+        String sqlQuery;
+        return switch (by) {
+            case "title" -> {
+                sqlQuery = "select f.* from films as f where f.name like concat('%',?,'%')";
+                yield jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToFilm, query);
+            }
+            case "director" -> {
+                sqlQuery = "select f.* from films as f " +
+                        "inner join film_directors as fd on f.id = fd.film_id " +
+                        "inner join directors as d on d.id = fd.director_id " +
+                        "where d.name like concat('%',?,'%')";
+                yield jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToFilm, query);
+            }
+            case "title,director", "director,title" -> {
+                String sql = "select fl.* from films as fl " +
+                        "where fl.name like concat('%',?,'%')";
+                List<Film> filmsOne = jdbcTemplate.query(sql, MapRowClass::mapRowToFilm, query);
+
+                sql = "select f.* from films as f where f.id in " +
+                        "(select fd.film_id from film_directors as fd " +
+                        "inner join directors as d on fd.director_id = d.id " +
+                        "where d.name like concat('%',?,'%'))";
+                List<Film> filmsTwo = jdbcTemplate.query(sql, MapRowClass::mapRowToFilm, query);
+                yield Stream.concat(filmsOne.stream(), filmsTwo.stream()).collect(Collectors.toList());
+            }
+            default -> throw new BadRequestException("Передан неверный запрос");
+        };
     }
 }
