@@ -45,4 +45,16 @@ public class GenreDbStorage implements GenreStorage {
                 "(select genre_id from film_genres where film_id = ?)";
         return new HashSet<>(jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToGenre, id));
     }
+
+    @Override
+    public void deleteGenresByFilm(Long id) {
+        String sqlQuery = "delete from film_genres where film_id = ?";
+        jdbcTemplate.update(sqlQuery, id);
+    }
+
+    @Override
+    public void clearTableGenres(Long id) {
+        String sqlQuery = "delete from film_genres where film_id = ?";
+        jdbcTemplate.update(sqlQuery, id);
+    }
 }

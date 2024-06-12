@@ -86,20 +86,25 @@ public class FilmServiceImpl implements FilmService {
         }
 
         if (film.getGenres() != null) {
-            List<Integer> genresIds = film.getGenres().stream().map(Genre::getId).collect(Collectors.toList());
+            List<Integer> genresIds = film.getGenres().stream().map(Genre::getId).toList();
             if (!genresIds.isEmpty()) {
-                filmDbStorage.addGenresToFilm(film.getId(), genresIds);
+                genreService.clearTableGenres(film.getId());
+                genresIds.forEach(genre -> filmDbStorage.addGenreToFilm(film.getId(), genre));
+            } else {
+                genreService.deleteGenresByFilm(film.getId());
             }
         }
         if (film.getDirectors() != null) {
             directorStorage.setDirectorToFilm(film);
+        } else {
+            directorStorage.removeDirectorById(film.getId());
         }
-        return updatedFilm;
+        return getFilmById(film.getId());
     }
 
     @Override
     public List<Film> getAllFilms() {
-        return filmDbStorage.getAllFilms();
+        return filmDbStorage.getAllFilms().stream().map(this::getFullFilmObject).collect(Collectors.toList());
     }
 
     @Override
@@ -121,6 +126,7 @@ public class FilmServiceImpl implements FilmService {
                 .mpa(mpa)
                 .likeIds(likesStorage.getLikes(film.getId()))
                 .genres(genreService.getAllGenresByFilm(film.getId()))
+                .directors(directorStorage.getDirectorsFilm(film.getId()))
                 .build();
     }
 
@@ -156,7 +162,8 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> getFilmsSortByYearOrLikes(Long id, String obj) {
-        return directorStorage.getFilmsSortByYearOrLikes(id, obj);
+        return directorStorage.getFilmsSortByYearOrLikes(id, obj).stream()
+                .map(this::getFullFilmObject).collect(Collectors.toList());
     }
 
     @Override
@@ -167,10 +174,10 @@ public class FilmServiceImpl implements FilmService {
 
     private Film getFullFilmObject(Film film) {
         return film.toBuilder()
-                .likeIds(new HashSet<>(likesStorage.getLikes(film.getId())))
+                .likeIds(likesStorage.getLikes(film.getId()))
                 .mpa(mpaService.findRatingByFilmId(film.getId()).get())
-                .genres(new HashSet<>(genreService.getAllGenresByFilm(film.getId())))
-                .directors(new HashSet<>(directorStorage.getDirectorsFilm(film.getId().longValue())))
+                .genres(genreService.getAllGenresByFilm(film.getId()))
+                .directors(directorStorage.getDirectorsFilm(film.getId().longValue()))
                 .build();
     }
 }

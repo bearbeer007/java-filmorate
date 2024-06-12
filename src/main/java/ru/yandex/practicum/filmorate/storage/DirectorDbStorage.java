@@ -76,7 +76,7 @@ public class DirectorDbStorage implements DirectorStorage {
     public Optional<Director> removeDirectorById(Long id) {
         Optional<Director> director = findDirectorById(id);
         if (director.isPresent()) {
-            String sql = "delete from films where id = ?";
+            String sql = "delete from film_directors where film_id = ?";
             jdbcTemplate.update(sql, id);
             log.info("Deleted");
             return director;
@@ -99,6 +99,8 @@ public class DirectorDbStorage implements DirectorStorage {
                     .name(filmRows.getString("name"))
                     .build();
             filmDirectors.add(director);
+        } else {
+            return new HashSet<>(Set.of());
         }
         return new HashSet<>(filmDirectors);
     }

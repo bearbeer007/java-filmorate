@@ -151,8 +151,8 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void addGenreToFilm(Long filmId, Integer genreId) {
-        String sqlQuery = "insert into film_genres (film_id, genre_id) values (?, ?)";
-        jdbcTemplate.update(sqlQuery, filmId, genreId);
+        String sqlQuery = "merge into film_genres(genre_id, film_id) values (?, ?)";
+        jdbcTemplate.update(sqlQuery, genreId, filmId);
     }
 
     @Override
