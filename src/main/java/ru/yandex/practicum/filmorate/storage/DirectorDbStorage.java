@@ -139,7 +139,7 @@ public class DirectorDbStorage implements DirectorStorage {
                            "order by extract(year from CAST(f.release_date AS date)) ASC";
                 yield getSortFilms(id, sqlQuery);
             }
-            default -> throw new BadRequestException( "Передан неверный запрос");
+            default -> throw new BadRequestException("Передан неверный запрос");
         };
     }
 
