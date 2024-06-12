@@ -125,10 +125,10 @@ public class DirectorDbStorage implements DirectorStorage {
                            "where f.id in " +
                            "(select fd.film_id from film_directors as fd " +
                            "inner join directors as d on fd.director_id = d.id " +
-                           "inner join film_likes as fl on fd.film_id = fl.film_id " +
+                           "inner join like_films as lf on fd.film_id = lf.film_id " +
                            "where fd.director_id = ? " +
                            "group by fd.film_id " +
-                           "order by count(fl.user_id) DESC)";
+                           "order by count(lf.user_id) DESC)";
                 yield getSortFilms(id, sqlQuery);
             }
             case "year" -> {

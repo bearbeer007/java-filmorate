@@ -15,7 +15,7 @@ public class DirectorController {
 
     private final DirectorService directorService;
 
-    @PostMapping
+    @PostMapping(path = {"/", ""})
     public Director addDirector(@Valid @RequestBody Director director) {
         return directorService.addDirector(director);
     }

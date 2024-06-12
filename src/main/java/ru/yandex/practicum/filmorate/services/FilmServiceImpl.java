@@ -46,6 +46,9 @@ public class FilmServiceImpl implements FilmService {
                     .collect(Collectors.toList());
             filmDbStorage.addGenresToFilm(film.getId(), films);
         }
+        if (film.getDirectors() != null) {
+            directorStorage.setDirectorToFilm(film);
+        }
         return createdFilm;
     }
 
@@ -87,6 +90,9 @@ public class FilmServiceImpl implements FilmService {
             if (!genresIds.isEmpty()) {
                 filmDbStorage.addGenresToFilm(film.getId(), genresIds);
             }
+        }
+        if (film.getDirectors() != null) {
+            directorStorage.setDirectorToFilm(film);
         }
         return updatedFilm;
     }
