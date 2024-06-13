@@ -54,7 +54,7 @@ public class FilmServiceImpl implements FilmService {
     }
 
     private void mpaIds(Film film) {
-        var mpaIds = mpaService.getAllRatings().stream().map(Mpa::getId).collect(Collectors.toList());
+        var mpaIds = mpaService.getAllRatings().stream().map(Mpa::getId).toList();
         if (!mpaIds.contains(film.getMpa().getId())) {
             throw new BadRequestException("Передан не существующий рейтинг Mpa.");
         }
@@ -62,11 +62,11 @@ public class FilmServiceImpl implements FilmService {
             var genresIdsDb = genreService.getAllGenres()
                     .stream()
                     .map(Genre::getId)
-                    .collect(Collectors.toList());
+                    .toList();
             var filmsGenres = film.getGenres()
                     .stream()
                     .map(Genre::getId)
-                    .collect(Collectors.toList());
+                    .toList();
             for (Integer filmsGenreId : filmsGenres) {
                 if (!genresIdsDb.contains(filmsGenreId)) {
                     throw new BadRequestException("Передан не существующий жанр");
@@ -145,7 +145,10 @@ public class FilmServiceImpl implements FilmService {
     public List<Film> getCommonFilms(Long userId, Long friendId) {
         userDbStorage.findUserById(userId);
         userDbStorage.findUserById(friendId);
-        return filmDbStorage.getCommonFilms(userId, friendId);
+        List<Film> films = filmDbStorage.getCommonFilms(userId, friendId);
+        return films.stream()
+                .map(this::getFullFilmObject)
+                .collect(Collectors.toList());
     }
 
     public Set<Film> getRecommendFilms(Long userId) {
@@ -165,24 +168,19 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> getFilmsSortByYearOrLikes(Long id, FilmSortParameters param) {
-/*        return directorStorage.getFilmsSortByYearOrLikes(id, obj).stream()
-                .map(this::getFullFilmObject).collect(Collectors.toList());*/
-
         return getSortedFilmByDirector(param,id);
     }
-
 
     public List<Film> getSortedFilmByDirector(FilmSortParameters param, Long directorId) {
         return filmDbStorage.getSortedFilmByDirector(param, directorId);
     }
+
     @Override
     public List<Film> searchFilmsByTitleAndDirector(String query, String obj) {
-       // List<Film> films = filmDbStorage.searchFilmsByTitleAndDirector(query, obj);
-        return search(query,obj);//films.stream().map(this::getFullFilmObject).collect(Collectors.toList());
+        return search(query,obj);
     }
 
-
-    public List<Film> search(String query, String by) {
+    private List<Film> search(String query, String by) {
         return filmDbStorage.search(query, by);
     }
 

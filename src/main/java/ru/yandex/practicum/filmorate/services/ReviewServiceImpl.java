@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.ReviewLikeStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.ReviewStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
+import ru.yandex.practicum.filmorate.storage.mapper.MapRowClass;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +32,7 @@ public class ReviewServiceImpl implements ReviewService {
 
         Long reviewId = reviewStorage.add(review);
 
-        eventStorage.addEvent(review.getUserId(), reviewId, EventType.REVIEW, Operation.ADD);
+        eventStorage.addEvent(MapRowClass.mapRowToEvent(review.getUserId(), reviewId, EventType.REVIEW, Operation.ADD));
 
         return reviewId;
     }
@@ -42,7 +43,7 @@ public class ReviewServiceImpl implements ReviewService {
 
         Review reviewNew = reviewStorage.get(review.getId()).get();
 
-        eventStorage.addEvent(reviewNew.getUserId(), reviewNew.getId(), EventType.REVIEW, Operation.UPDATE);
+        eventStorage.addEvent(MapRowClass.mapRowToEvent(reviewNew.getUserId(), reviewNew.getId(), EventType.REVIEW, Operation.UPDATE));
     }
 
     public List<Review> getByFilmId(Integer filmId, Integer count) {
@@ -57,7 +58,7 @@ public class ReviewServiceImpl implements ReviewService {
 
         reviewStorage.deleteById(id);
 
-        eventStorage.addEvent(review.getUserId(), review.getId(), EventType.REVIEW, Operation.REMOVE);
+        eventStorage.addEvent(MapRowClass.mapRowToEvent(review.getUserId(), review.getId(), EventType.REVIEW, Operation.REMOVE));
     }
 
     public Review getById(Long id) {

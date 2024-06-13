@@ -97,4 +97,13 @@ public class MapRowClass {
                 .name(resultSet.getString("name"))
                 .build();
     }
+
+    public static Event mapRowToEvent(Long userId, Long entityId, EventType eventType, Operation operation) {
+        return Event.builder()
+                .userId(userId)
+                .entityId(entityId)
+                .eventType(eventType)
+                .operation(operation)
+                .build();
+    }
 }

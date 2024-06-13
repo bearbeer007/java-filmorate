@@ -159,7 +159,6 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(sqlJustCount, this::getFilmsWithGenresAndMpas, count);
     }
 
-  
     public List<Film> getPopular(Long count) {
         String selectPopular = "SELECT f.id, f.name, f.description, \n" +
                 "                f.release_date, f.duration, \n" +
@@ -180,7 +179,6 @@ public class FilmDbStorage implements FilmStorage {
         setFilmDirectors(films, getFilmDirectors(idList));
         return films;
     }
-
 
     public List<Film> getPopularByGenresAndYear(Long count, Integer genreId, Integer year) {
         List<Film> filmList = getPopular(count);
@@ -301,7 +299,6 @@ public class FilmDbStorage implements FilmStorage {
         return director;
     }
 
-
     private Genre getGenreFromResultSet(final ResultSet rs) throws SQLException {
         Genre genre = null;
 
@@ -315,7 +312,6 @@ public class FilmDbStorage implements FilmStorage {
 
         return genre;
     }
-
 
     @Override
     public void addGenreToFilm(Long filmId, Integer genreId) {
@@ -519,5 +515,4 @@ public class FilmDbStorage implements FilmStorage {
         }
         return validatedFilms;
     }
-
 }
