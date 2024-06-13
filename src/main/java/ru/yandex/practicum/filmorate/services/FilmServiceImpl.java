@@ -37,7 +37,7 @@ public class FilmServiceImpl implements FilmService {
         }
         if (!film.getLikeIds().isEmpty()) {
             for (Long likeId : film.getLikeIds()) {
-                likesStorage.addLike(createdFilm.getId(), likeId);
+                likesStorage.addLike(film.getId(), likeId);
             }
         }
         if (film.getGenres() != null) {
@@ -50,7 +50,7 @@ public class FilmServiceImpl implements FilmService {
         if (film.getDirectors() != null) {
             directorStorage.setDirectorToFilm(film);
         }
-        return createdFilm;
+        return getFilmById(createdFilm.getId());
     }
 
     private void mpaIds(Film film) {
@@ -158,7 +158,9 @@ public class FilmServiceImpl implements FilmService {
             List<Film> films = filmDbStorage.findRecommendedFilms(userId, similarUserId);
             recommendedFilms.addAll(films);
         }
-        return recommendedFilms;
+        return recommendedFilms.stream()
+                .map(this::getFullFilmObject)
+                .collect(Collectors.toSet());
     }
 
     @Override

@@ -32,10 +32,6 @@ public class LikesServiceImpl implements LikesService {
     @Override
     public Film addLike(Long filmId, Long userId) {
         userService.getUserById(userId);
-        if (getLikes(filmId).contains(userId)) {
-            throw new BadRequestException("One user - one like, exceeded the allowed number of likes");
-
-        }
         eventStorage.addEvent(userId, filmId, EventType.LIKE, Operation.ADD);
         return likesStorage.addLike(filmId, userId);
     }
