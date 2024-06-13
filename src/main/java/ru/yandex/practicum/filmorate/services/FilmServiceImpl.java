@@ -98,7 +98,7 @@ public class FilmServiceImpl implements FilmService {
         if (film.getDirectors() != null) {
             directorStorage.setDirectorToFilm(film);
         } else {
-            directorStorage.removeDirectorById(film.getId());
+            directorStorage.removeFilmDirectorById(film.getId());
         }
         return getFilmById(film.getId());
     }

@@ -89,16 +89,14 @@ public class DirectorDbStorage implements DirectorStorage {
     }
 
     @Override
-    public Optional<Director> removeDirectorById(Long id) {
+    public void removeFilmDirectorById(Long id) {
         Optional<Director> director = findDirectorById(id);
         if (director.isPresent()) {
             String sql = "delete from film_directors where film_id = ?";
             jdbcTemplate.update(sql, id);
             log.info("Deleted");
-            return director;
         } else {
             log.info("Director with id: {} not found", id);
-            return Optional.empty();
         }
     }
 
@@ -159,6 +157,20 @@ public class DirectorDbStorage implements DirectorStorage {
             }
             default -> throw new BadRequestException("Передан неверный запрос");
         };
+    }
+
+    @Override
+    public Optional<Director> removeDirectorById(Long id) {
+        Optional<Director> director = findDirectorById(id);
+        if (director.isPresent()) {
+            String sql = "delete from directors where id = ?";
+            jdbcTemplate.update(sql, id);
+            log.info("Deleted");
+            return director;
+        } else {
+            log.info("Director with id: {} not found", id);
+            return Optional.empty();
+        }
     }
 
     private List<Film> getSortFilms(Long id, String query) {

@@ -31,14 +31,4 @@ public class Film {
     @NotNull
     private Mpa mpa;
     private Set<Director> directors;
-
-    @Override
-    public boolean equals(Object film) {
-        if (film == null) return false;
-        if (film.getClass() != this.getClass()) return false;
-        final Film other = (Film) film;
-        if (other.id == null) return false;
-        return name.equals(other.name) && description.equals(other.description) &&
-                releaseDate.equals(other.releaseDate);
-    }
 }

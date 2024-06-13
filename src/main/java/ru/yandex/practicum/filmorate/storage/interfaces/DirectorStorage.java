@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.interfaces;
 
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.enums.FilmSortParameters;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,11 +17,13 @@ public interface DirectorStorage {
 
     Director updateDirector(Director director);
 
-    Optional<Director> removeDirectorById(Long id);
+    void removeFilmDirectorById(Long id);
 
     Set<Director> getDirectorsFilm(Long id);
 
     void setDirectorToFilm(Film film);
 
     List<Film> getFilmsSortByYearOrLikes(Long id, String obj);
+
+    Optional<Director> removeDirectorById(Long id);
 }
