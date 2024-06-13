@@ -4,11 +4,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exeption.BadRequestException;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -23,12 +27,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.toUnmodifiableList;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Override
     public Film addFilm(Film film) {
@@ -148,6 +156,164 @@ public class FilmDbStorage implements FilmStorage {
                         "limit ?; ";
         return jdbcTemplate.query(sqlJustCount, this::getFilmsWithGenresAndMpas, count);
     }
+
+  
+    public List<Film> getPopular(Long count) {
+        String selectPopular = "SELECT f.id, f.name, f.description, \n" +
+                "                f.release_date, f.duration, \n" +
+                "                mr.id AS id_rating, mr.name AS name_rating, COUNT(l.user_id) AS likesCount \n" +
+                "                FROM films f \n" +
+                "                LEFT JOIN ratings mr ON mr.id = f.rating_mpa_id \n" +
+                "                LEFT JOIN like_films l ON l.film_id = f.id \n" +
+                "                GROUP BY f.id, mr.id \n" +
+                "                ORDER BY likesCount DESC";
+
+        if (count != null) {
+            selectPopular += " LIMIT " + count;
+        }
+
+        final List<Film> films = jdbcTemplate.query(selectPopular + ";", MapRowClass::mapRowToFilm2);
+        final List<Long> idList = films.stream().map(Film::getId).collect(toUnmodifiableList());
+        setFilmGenres(films, getFilmGenres(idList));
+        setFilmDirectors(films, getFilmDirectors(idList));
+        return films;
+    }
+
+
+    public List<Film> getPopularByGenresAndYear(Long count, Integer genreId, Integer year) {
+        List<Film> filmList = getPopular(count);
+        if (genreId != null) {
+            filmList = filmList.stream()
+                    .filter(film -> film.getGenres() != null)
+                    .filter(film -> film.getGenres().stream()
+                            .map(Genre::getId)
+                            .collect(Collectors.toList())
+                            .contains(genreId))
+                    .collect(Collectors.toList());
+        }
+        if (year != null) {
+            filmList = filmList.stream()
+                    .filter(film -> film.getReleaseDate().getYear() == year)
+                    .collect(Collectors.toList());
+        }
+        return filmList;
+    }
+
+    private void setFilmGenres(final List<Film> films, final Map<Long, Set<Genre>> filmsGenres) {
+        if (!films.isEmpty()) {
+            films.forEach(f -> {
+                f.setGenres(filmsGenres.get(f.getId()));
+            });
+        }
+    }
+
+    private void setFilmDirectors(final List<Film> films,
+                                  final Map<Long, Set<Director>> filmsDirectors) {
+        if (!films.isEmpty()) {
+            films.forEach(f -> {
+                f.setDirectors(filmsDirectors.get(f.getId()));
+            });
+        }
+    }
+
+    private Map<Long, Set<Genre>> getFilmGenres(final List<Long> filmIds) {
+        if (filmIds.isEmpty()) {
+            return new HashMap<>();
+        }
+        final String sql = "SELECT f.id AS id_film, g.id AS id_genre, g.name AS name_genre\n" +
+                "FROM films f\n" +
+                "LEFT JOIN film_genres fg ON fg.film_id = f.id\n" +
+                "LEFT JOIN genres g ON g.id = fg.genre_id\n" +
+                "WHERE f.id IN (:ids)\n" +
+                "ORDER BY g.id;";
+        final SqlParameterSource parameters = new MapSqlParameterSource("ids", filmIds);
+
+        return namedParameterJdbcTemplate.query(sql, parameters, this::extractFilmGenres);
+    }
+
+    private Map<Long, Set<Director>> getFilmDirectors(final List<Long> filmIds) {
+        if (filmIds.isEmpty()) {
+            return new HashMap<>();
+        }
+        final String sql = "SELECT f.id AS id_film, fd.director_id AS id_director, d.name AS name_director\n" +
+                "                   FROM films f\n" +
+                "                   LEFT JOIN film_directors fd ON fd.film_id = f.id\n" +
+                "                   LEFT JOIN directors d ON d.id = fd.director_id\n" +
+                "                   WHERE f.id IN (:ids) ORDER BY d.id;";
+        final SqlParameterSource parameters = new MapSqlParameterSource("ids", filmIds);
+
+        return namedParameterJdbcTemplate.query(sql, parameters, this::extractFilmDirectors);
+    }
+
+    private Map<Long, Set<Genre>> extractFilmGenres(final ResultSet rs) throws SQLException {
+        final Map<Long, Set<Genre>> resultMap = new HashMap<>();
+
+        while (rs.next()) {
+            long filmId = rs.getLong("id_film");
+            final Genre genre = getGenreFromResultSet(rs);
+
+            // если жанров у фильма нет, то должен быть пустой список
+            if (!resultMap.containsKey(filmId)) {
+                resultMap.put(filmId, new LinkedHashSet<>());
+            }
+
+            if (nonNull(genre)) {
+                resultMap.get(filmId).add(genre);
+            }
+        }
+
+        return resultMap;
+    }
+
+    private Map<Long, Set<Director>> extractFilmDirectors(final ResultSet rs) throws SQLException {
+        final Map<Long, Set<Director>> resultMap = new HashMap<>();
+
+        while (rs.next()) {
+            long filmId = rs.getLong("id_film");
+            final Director director = getDirectorFromResultSet(rs);
+
+            // если режиссеров у фильма нет, то должен быть пустой список
+            if (!resultMap.containsKey(filmId)) {
+                resultMap.put(filmId, new LinkedHashSet<>());
+            }
+
+            if (nonNull(director)) {
+                resultMap.get(filmId).add(director);
+            }
+        }
+
+        return resultMap;
+    }
+
+    private Director getDirectorFromResultSet(final ResultSet rs) throws SQLException {
+        Director director = null;
+
+        Long directorId = rs.getLong("id_director");
+        if (!rs.wasNull()) {
+            director = Director.builder()
+                    .id(directorId)
+                    .name(rs.getString("name_director"))
+                    .build();
+        }
+
+        return director;
+    }
+
+
+    private Genre getGenreFromResultSet(final ResultSet rs) throws SQLException {
+        Genre genre = null;
+
+        int genreId = rs.getInt("id_genre");
+        if (!rs.wasNull()) {
+            genre = Genre.builder()
+                    .id(genreId)
+                    .name(rs.getString("name_genre"))
+                    .build();
+        }
+
+        return genre;
+    }
+
 
     @Override
     public void addGenreToFilm(Long filmId, Integer genreId) {

@@ -22,6 +22,28 @@ public class MapRowClass {
                 .build();
     }
 
+    public static Film mapRowToFilm2(ResultSet resultSet, int rowNum) throws SQLException {
+        Mpa rating = null;
+        int ratingId = resultSet.getInt("id_rating");
+        if (!resultSet.wasNull()) {
+            rating = Mpa.builder()
+                    .id(ratingId)
+                    .name(resultSet.getString("name_rating"))
+                    .build();
+        }
+
+        final Film film = Film.builder()
+                .id(resultSet.getLong("id"))
+                .name(resultSet.getString("name"))
+                .description(resultSet.getString("description"))
+                .releaseDate(resultSet.getDate("release_date").toLocalDate())
+                .duration(resultSet.getInt("duration"))
+                .mpa(rating)
+                .build();
+
+        return film;
+    }
+
 
     public static Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
         return Genre.builder()
