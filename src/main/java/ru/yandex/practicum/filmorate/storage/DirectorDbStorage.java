@@ -53,9 +53,9 @@ public class DirectorDbStorage implements DirectorStorage {
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
         if (filmRows.next()) {
             Director director = Director.builder()
-                            .id(filmRows.getLong("id"))
-                            .name(filmRows.getString("name"))
-                            .build();
+                    .id(filmRows.getLong("id"))
+                    .name(filmRows.getString("name"))
+                    .build();
             log.info("Director with ID {}: {}", id, director.getName());
             return Optional.of(director);
         }
@@ -103,8 +103,8 @@ public class DirectorDbStorage implements DirectorStorage {
     public Set<Director> getDirectorsFilm(Long id) {
         Set<Director> filmDirectors = new HashSet<>();
         String sql = "select * from directors as d " +
-                     "inner join film_directors AS fd ON d.id = fd.director_id " +
-                     "where fd.film_id = ?";
+                "inner join film_directors AS fd ON d.id = fd.director_id " +
+                "where fd.film_id = ?";
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sql, id);
         if (filmRows.next()) {
             Director director = Director.builder()
@@ -137,21 +137,21 @@ public class DirectorDbStorage implements DirectorStorage {
         return switch (obj) {
             case "likes" -> {
                 sqlQuery = "select f.* from films as f " +
-                           "where f.id in " +
-                           "(select fd.film_id from film_directors as fd " +
-                           "inner join directors as d on fd.director_id = d.id " +
-                           "inner join like_films as lf on fd.film_id = lf.film_id " +
-                           "where fd.director_id = ? " +
-                           "group by fd.film_id " +
-                           "order by count(lf.user_id) DESC)";
+                        "where f.id in " +
+                        "(select fd.film_id from film_directors as fd " +
+                        "inner join directors as d on fd.director_id = d.id " +
+                        "inner join like_films as lf on fd.film_id = lf.film_id " +
+                        "where fd.director_id = ? " +
+                        "group by fd.film_id " +
+                        "order by count(lf.user_id) DESC)";
                 yield getSortFilms(id, sqlQuery);
             }
             case "year" -> {
                 sqlQuery = "select f.* from films as f " +
-                           "inner join film_directors as fd on f.id = fd.film_id " +
-                           "where fd.director_id = ? " +
-                           "group by f.id, f.release_date " +
-                           "order by extract(year from CAST(f.release_date AS date)) ASC";
+                        "inner join film_directors as fd on f.id = fd.film_id " +
+                        "where fd.director_id = ? " +
+                        "group by f.id, f.release_date " +
+                        "order by extract(year from CAST(f.release_date AS date)) ASC";
                 yield getSortFilms(id, sqlQuery);
             }
             default -> throw new BadRequestException("Передан неверный запрос");

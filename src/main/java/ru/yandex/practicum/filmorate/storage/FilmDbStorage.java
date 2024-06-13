@@ -359,6 +359,7 @@ public class FilmDbStorage implements FilmStorage {
         return film;
 
     }
+
     private Film getFilmsWithGenresAndMpas(ResultSet resultSet, int rowNum) throws SQLException {
         Film film = MapRowClass.mapRowToFilm(resultSet, rowNum);
         film.setGenres(getAllFilmGenresById(resultSet.getLong("id")));
@@ -373,6 +374,7 @@ public class FilmDbStorage implements FilmStorage {
                 "(select genre_id from film_genres where film_id = ?)";
         return new HashSet<>(jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToGenre, id));
     }
+
     public Optional<Mpa> findRatingByFilmId(Long id) {
         String sqlQuery = "select r.id, r.name from films f join ratings r on f.rating_mpa_id = r.id where f.id = ?";
         try {
