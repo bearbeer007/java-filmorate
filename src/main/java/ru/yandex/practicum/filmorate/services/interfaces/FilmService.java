@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.services.interfaces;
 
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.enums.FilmSortParameters;
 
 import java.util.List;
 import java.util.Set;
@@ -24,5 +25,5 @@ public interface FilmService {
 
     List<Film> searchFilmsByTitleAndDirector(String query, String obj);
 
-    List<Film> getFilmsSortByYearOrLikes(Long id, String obj);
+    List<Film> getFilmsSortByYearOrLikes(Long id, FilmSortParameters param);
 }

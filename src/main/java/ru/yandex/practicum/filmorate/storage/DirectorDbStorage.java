@@ -3,6 +3,9 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
@@ -22,6 +25,7 @@ import java.util.stream.Collectors;
 public class DirectorDbStorage implements DirectorStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Override
     public Director addDirector(Director director) {
@@ -58,6 +62,17 @@ public class DirectorDbStorage implements DirectorStorage {
         return Optional.empty();
     }
 
+    public List<Director> getDirectorsByIds(final List<Long> idList) {
+        if (idList.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        final String sql = "SELECT * FROM directors WHERE id IN (:ids);";
+        final SqlParameterSource parameters = new MapSqlParameterSource("ids", idList);
+
+        return namedParameterJdbcTemplate.query(sql, parameters, MapRowClass::mapRowToDirector);
+    }
+
     @Override
     public Director updateDirector(Director director) {
         Optional<Director> optionalDirector = findDirectorById(director.getId());
@@ -73,16 +88,14 @@ public class DirectorDbStorage implements DirectorStorage {
     }
 
     @Override
-    public Optional<Director> removeDirectorById(Long id) {
+    public void removeFilmDirectorById(Long id) {
         Optional<Director> director = findDirectorById(id);
         if (director.isPresent()) {
-            String sql = "delete from films where id = ?";
+            String sql = "delete from film_directors where film_id = ?";
             jdbcTemplate.update(sql, id);
             log.info("Deleted");
-            return director;
         } else {
             log.info("Director with id: {} not found", id);
-            return Optional.empty();
         }
     }
 
@@ -99,6 +112,8 @@ public class DirectorDbStorage implements DirectorStorage {
                     .name(filmRows.getString("name"))
                     .build();
             filmDirectors.add(director);
+        } else {
+            return new HashSet<>(Set.of());
         }
         return new HashSet<>(filmDirectors);
     }
@@ -141,6 +156,20 @@ public class DirectorDbStorage implements DirectorStorage {
             }
             default -> throw new BadRequestException("Передан неверный запрос");
         };
+    }
+
+    @Override
+    public Optional<Director> removeDirectorById(Long id) {
+        Optional<Director> director = findDirectorById(id);
+        if (director.isPresent()) {
+            String sql = "delete from directors where id = ?";
+            jdbcTemplate.update(sql, id);
+            log.info("Deleted");
+            return director;
+        } else {
+            log.info("Director with id: {} not found", id);
+            return Optional.empty();
+        }
     }
 
     private List<Film> getSortFilms(Long id, String query) {

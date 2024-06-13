@@ -6,8 +6,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Event;
-import ru.yandex.practicum.filmorate.model.enums.EventType;
-import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.storage.interfaces.EventStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.MapRowClass;
 
@@ -18,6 +16,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class EventDbStorage implements EventStorage {
+
     private final JdbcTemplate jdbcTemplate;
 
     @Override
@@ -49,17 +48,5 @@ public class EventDbStorage implements EventStorage {
         event.setEventId(id);
 
         return event;
-    }
-
-    @Override
-    public Event addEvent(Long userId, Long entityId, EventType eventType, Operation operation) {
-        Event event = Event.builder()
-                .userId(userId)
-                .entityId(entityId)
-                .eventType(eventType)
-                .operation(operation)
-                .build();
-
-        return addEvent(event);
     }
 }

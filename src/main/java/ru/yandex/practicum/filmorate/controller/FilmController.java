@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.enums.FilmSortParameters;
 import ru.yandex.practicum.filmorate.services.interfaces.FilmService;
 import ru.yandex.practicum.filmorate.services.interfaces.LikesService;
 
@@ -57,7 +58,11 @@ public class FilmController {
     }
 
     @GetMapping(value = "/popular")
-    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") @Positive Long count, @RequestParam(required = false) Integer genreId, @RequestParam(required = false) Integer year) {
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") @Positive Long count,
+                                      @RequestParam(required = false) Integer genreId,
+                                      @RequestParam(required = false) Integer year) {
+        log.info(String.format("GET /films/popular?count={count}&genreId={genreId}&year={year}, {count} = %s, " +
+                "{genreID} = %s, {year} = %s", count, genreId, year));
         return filmService.getPopularFilms(count, genreId, year);
     }
 
@@ -76,8 +81,8 @@ public class FilmController {
 
     @GetMapping("/director/{id}")
     public Collection<Film> getFilmsDirector(@Valid @PathVariable(value = "id") Long id,
-                                             @RequestParam(value = "sortBy") String obj) {
-        return filmService.getFilmsSortByYearOrLikes(id, obj);
+                                             @RequestParam(value = "sortBy") FilmSortParameters param) {
+        return filmService.getFilmsSortByYearOrLikes(id, param);
     }
 
     @GetMapping(value = "/search")

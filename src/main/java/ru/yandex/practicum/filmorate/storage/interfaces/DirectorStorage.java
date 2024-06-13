@@ -17,11 +17,13 @@ public interface DirectorStorage {
 
     Director updateDirector(Director director);
 
-    Optional<Director> removeDirectorById(Long id);
+    void removeFilmDirectorById(Long id);
 
     Set<Director> getDirectorsFilm(Long id);
 
     void setDirectorToFilm(Film film);
 
     List<Film> getFilmsSortByYearOrLikes(Long id, String obj);
+
+    Optional<Director> removeDirectorById(Long id);
 }

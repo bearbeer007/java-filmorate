@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.services.interfaces.FriendsService;
 import ru.yandex.practicum.filmorate.storage.interfaces.EventStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.FriendsStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
+import ru.yandex.practicum.filmorate.storage.mapper.MapRowClass;
 
 import java.util.List;
 import java.util.Set;
@@ -31,7 +32,7 @@ public class FriendsServiceImpl implements FriendsService {
         validateDifferentIds(userId, friendId);
         userStorage.findUserById(userId);
         userStorage.findUserById(friendId);
-        eventStorage.addEvent(userId, friendId, EventType.FRIEND, Operation.ADD);
+        eventStorage.addEvent(MapRowClass.mapRowToEvent(userId, friendId, EventType.FRIEND, Operation.ADD));
         return friendsStorage.addFriend(userId, friendId);
     }
 
@@ -41,8 +42,7 @@ public class FriendsServiceImpl implements FriendsService {
         userStorage.findUserById(userId);
         userStorage.findUserById(friendId);
         friendsStorage.deleteFriend(userId, friendId);
-        eventStorage.addEvent(userId, friendId, EventType.FRIEND, Operation.REMOVE);
-
+        eventStorage.addEvent(MapRowClass.mapRowToEvent(userId, friendId, EventType.FRIEND, Operation.REMOVE));
     }
 
     @Override
