@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.mapper.ListFilmExtractor;
 import ru.yandex.practicum.filmorate.storage.mapper.MapRowClass;
 
 import java.sql.Date;
@@ -105,7 +106,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public List<Film> getPopularFilms(Long count, Integer genreId, Integer year) {
 
-        String sqlQuery = "select f.*" +
+        String sqlQuery = "select f.id as film_id, f.name, f.description, f.release_date, f.duration, m.id as mpaId, m.name as mpaName, g.id as genreId, g.name as genreName, l1.user_id " +
                 "from films f " +
                 "join like_films l1 on f.id = l1.film_id " +
                 "left join RATINGS m on f.rating_mpa_id = m.id " +
@@ -114,38 +115,25 @@ public class FilmDbStorage implements FilmStorage {
                 "left join like_films l2 on f.id = l2.film_id ";
         if (genreId != null && year != null) {
             String sqlAdd = "where YEAR(f.release_date) = ? AND g.id = ?" +
-                    "group by f.id " +
+                    "group by f.id, genreId, l1.user_id " +
                     "order by count(l2.user_id) desc ";
-            return jdbcTemplate.query(sqlQuery + sqlAdd, MapRowClass::mapRowToFilm, year, genreId);
+            return jdbcTemplate.query(sqlQuery + sqlAdd, new ListFilmExtractor(), year, genreId);
         }
         if (genreId != null) {
             String sqlAdd = "where g.id = ?" +
-                    "group by f.id " +
+                    "group by f.id, genreId, l1.user_id " +
                     "order by count(l2.user_id) desc ";
-            return jdbcTemplate.query(sqlQuery + sqlAdd, MapRowClass::mapRowToFilm, genreId);
+            return jdbcTemplate.query(sqlQuery + sqlAdd, new ListFilmExtractor(), genreId);
         }
         if (year != null) {
             String sqlAdd = "where YEAR(f.release_date) = ? " +
-                    "group by f.id " +
+                    "group by f.id, genreId, l1.user_id " +
                     "order by count(l2.user_id) desc ";
-            return jdbcTemplate.query(sqlQuery + sqlAdd, MapRowClass::mapRowToFilm, year);
+            return jdbcTemplate.query(sqlQuery + sqlAdd, new ListFilmExtractor(), year);
         }
 
-        String sqlJustCount =
-                "select  f.*, rat.name AS mpa_name " +
-                        "FROM films AS f " +
-                        "left join ( " +
-                        "select film_id, count (user_id) AS popular " +
-                        "from like_films AS lf " +
-                        "group by film_id " +
-                        ") as pop on pop.film_id = f.id " +
-                        "left join ( " +
-                        "select * " +
-                        "from ratings as r " +
-                        ") as rat on rat.id = f.rating_mpa_id " +
-                        "order by pop.popular desc " +
-                        "limit ?; ";
-        return jdbcTemplate.query(sqlJustCount, MapRowClass::mapRowToFilm, count);
+        return jdbcTemplate.query(sqlQuery + "group by f.id, genreId, l1.user_id " +
+                "order by count(l2.user_id) desc " + "limit ? ", new ListFilmExtractor(), count);
     }
 
     @Override
