@@ -476,4 +476,48 @@ public class FilmDbStorage implements FilmStorage {
         return films;
     }
 
+    public List<Film> search(String query, String by) {
+        final List<Film> films = new ArrayList<>(getPopular(null));
+        final List<Film> validatedFilms = new ArrayList<>();
+        final String lowerCaseQuery = query.toLowerCase();
+        switch (by) {
+            case ("title"):
+                for (Film film : films) {
+                    if (film.getName().toLowerCase().contains(lowerCaseQuery)) {
+                        validatedFilms.add(film);
+                    }
+                }
+                break;
+            case ("director"):
+                for (Film film : films) {
+                    for (Director director : film.getDirectors()) {
+                        if (director.getName().toLowerCase().contains(lowerCaseQuery)) {
+                            validatedFilms.add(film);
+                        }
+                    }
+                }
+                break;
+            default:
+                final String[] splitBy = by.split(",");
+                if (splitBy.length == 2
+                        && (splitBy[0].equals("title")
+                        && splitBy[1].equals("director")
+                        || splitBy[1].equals("title")
+                        && splitBy[0].equals("director"))) {
+                    for (Film film : films) {
+                        if (film.getName().toLowerCase().contains(lowerCaseQuery)) {
+                            validatedFilms.add(film);
+                        }
+                        for (Director director : film.getDirectors()) {
+                            if (director.getName().toLowerCase().contains(lowerCaseQuery)) {
+                                validatedFilms.add(film);
+                            }
+                        }
+                    }
+                    break;
+                }
+        }
+        return validatedFilms;
+    }
+
 }

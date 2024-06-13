@@ -175,8 +175,13 @@ public class FilmServiceImpl implements FilmService {
     }
     @Override
     public List<Film> searchFilmsByTitleAndDirector(String query, String obj) {
-        List<Film> films = filmDbStorage.searchFilmsByTitleAndDirector(query, obj);
-        return films.stream().map(this::getFullFilmObject).collect(Collectors.toList());
+       // List<Film> films = filmDbStorage.searchFilmsByTitleAndDirector(query, obj);
+        return search(query,obj);//films.stream().map(this::getFullFilmObject).collect(Collectors.toList());
+    }
+
+
+    public List<Film> search(String query, String by) {
+        return filmDbStorage.search(query, by);
     }
 
     private Film getFullFilmObject(Film film) {
