@@ -3,6 +3,9 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
@@ -10,6 +13,7 @@ import ru.yandex.practicum.filmorate.exeption.BadRequestException;
 import ru.yandex.practicum.filmorate.exeption.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.enums.FilmSortParameters;
 import ru.yandex.practicum.filmorate.storage.interfaces.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.MapRowClass;
 
@@ -22,6 +26,7 @@ import java.util.stream.Collectors;
 public class DirectorDbStorage implements DirectorStorage {
 
     private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Override
     public Director addDirector(Director director) {
@@ -56,6 +61,17 @@ public class DirectorDbStorage implements DirectorStorage {
             return Optional.of(director);
         }
         return Optional.empty();
+    }
+
+    public List<Director> getDirectorsByIds(final List<Long> idList) {
+        if (idList.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        final String sql = "SELECT * FROM directors WHERE id IN (:ids);";
+        final SqlParameterSource parameters = new MapSqlParameterSource("ids", idList);
+
+        return namedParameterJdbcTemplate.query(sql, parameters, MapRowClass::mapRowToDirector);
     }
 
     @Override

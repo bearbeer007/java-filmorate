@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.enums.FilmSortParameters;
 import ru.yandex.practicum.filmorate.services.interfaces.FilmService;
 import ru.yandex.practicum.filmorate.services.interfaces.LikesService;
 
@@ -80,8 +81,8 @@ public class FilmController {
 
     @GetMapping("/director/{id}")
     public Collection<Film> getFilmsDirector(@Valid @PathVariable(value = "id") Long id,
-                                             @RequestParam(value = "sortBy") String obj) {
-        return filmService.getFilmsSortByYearOrLikes(id, obj);
+                                             @RequestParam(value = "sortBy") FilmSortParameters param) {
+        return filmService.getFilmsSortByYearOrLikes(id, param);
     }
 
     @GetMapping(value = "/search")

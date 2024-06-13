@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.enums.FilmSortParameters;
 import ru.yandex.practicum.filmorate.services.interfaces.FilmService;
 import ru.yandex.practicum.filmorate.storage.*;
 import ru.yandex.practicum.filmorate.storage.interfaces.DirectorStorage;
@@ -161,11 +162,17 @@ public class FilmServiceImpl implements FilmService {
     }
 
     @Override
-    public List<Film> getFilmsSortByYearOrLikes(Long id, String obj) {
-        return directorStorage.getFilmsSortByYearOrLikes(id, obj).stream()
-                .map(this::getFullFilmObject).collect(Collectors.toList());
+    public List<Film> getFilmsSortByYearOrLikes(Long id, FilmSortParameters param) {
+/*        return directorStorage.getFilmsSortByYearOrLikes(id, obj).stream()
+                .map(this::getFullFilmObject).collect(Collectors.toList());*/
+
+        return getSortedFilmByDirector(param,id);
     }
 
+
+    public List<Film> getSortedFilmByDirector(FilmSortParameters param, Long directorId) {
+        return filmDbStorage.getSortedFilmByDirector(param, directorId);
+    }
     @Override
     public List<Film> searchFilmsByTitleAndDirector(String query, String obj) {
         List<Film> films = filmDbStorage.searchFilmsByTitleAndDirector(query, obj);

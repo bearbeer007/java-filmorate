@@ -16,6 +16,7 @@ import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.enums.FilmSortParameters;
 import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.MapRowClass;
 
@@ -37,6 +38,7 @@ public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private final DirectorDbStorage directorDbStorage;
 
     @Override
     public Film addFilm(Film film) {
@@ -448,4 +450,30 @@ public class FilmDbStorage implements FilmStorage {
             default -> throw new BadRequestException("Передан неверный запрос");
         };
     }
+
+    public List<Film> getSortedFilmByDirector(FilmSortParameters param, long directorId) {
+        if (directorDbStorage.getDirectorsByIds(List.of(directorId)).isEmpty()) {
+            throw new NotFoundException("Режиссера с данным ID не найдено");
+        }
+        String sql = "SELECT f.id, f.name, f.description, f.release_date, f.duration, "
+                + "f.rating_mpa_id as id_rating, r.name AS name_rating FROM films f "
+                + "JOIN film_directors fd ON fd.film_id = f.id "
+                + "JOIN directors d ON d.id = fd.director_id "
+                + "LEFT JOIN ratings r ON r.id = f.rating_mpa_id ";
+        if (param.equals(FilmSortParameters.year)) {
+            sql += "WHERE d.id = ? "
+                    + "ORDER BY EXTRACT (YEAR FROM f.release_date);";
+        } else {
+            sql += "LEFT JOIN like_films l ON l.film_id = f.id "
+                    + "WHERE d.id = ? "
+                    + "GROUP BY f.id "
+                    + "ORDER BY COUNT(l.user_id) DESC;";
+        }
+        final List<Film> films = jdbcTemplate.query(sql, MapRowClass::mapRowToFilm2, directorId);
+        final List<Long> idList = films.stream().map(Film::getId).collect(toUnmodifiableList());
+        setFilmGenres(films, getFilmGenres(idList));
+        setFilmDirectors(films, getFilmDirectors(idList)); //на случай, если режиссеров несколько
+        return films;
+    }
+
 }
