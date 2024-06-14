@@ -10,7 +10,6 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exeption.BadRequestException;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -26,7 +25,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toUnmodifiableList;
@@ -113,51 +111,6 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
-    @Override
-    public List<Film> getPopularFilms(Long count, Integer genreId, Integer year) {
-
-        String sqlQuery = "select f.*" +
-                "from films f " +
-                "join like_films l1 on f.id = l1.film_id " +
-                "left join RATINGS m on f.rating_mpa_id = m.id " +
-                "left join film_genres fg on f.id = fg.film_id " +
-                "left join genres g on fg.genre_id = g.id " +
-                "left join like_films l2 on f.id = l2.film_id ";
-        if (genreId != null && year != null) {
-            String sqlAdd = "where YEAR(f.release_date) = ? AND g.id = ?" +
-                    "group by f.id " +
-                    "order by count(l2.user_id) desc ";
-            return jdbcTemplate.query(sqlQuery + sqlAdd, MapRowClass::mapRowToFilm, year, genreId);
-        }
-        if (genreId != null) {
-            String sqlAdd = "where g.id = ?" +
-                    "group by f.id " +
-                    "order by count(l2.user_id) desc ";
-            return jdbcTemplate.query(sqlQuery + sqlAdd, MapRowClass::mapRowToFilm, genreId);
-        }
-        if (year != null) {
-            String sqlAdd = "where YEAR(f.release_date) = ? " +
-                    "group by f.id " +
-                    "order by count(l2.user_id) desc ";
-            return jdbcTemplate.query(sqlQuery + sqlAdd, MapRowClass::mapRowToFilm, year);
-        }
-
-        String sqlJustCount =
-                "select  f.*, rat.name AS mpa_name " +
-                        "FROM films AS f " +
-                        "left join ( " +
-                        "select film_id, count (user_id) AS popular " +
-                        "from like_films AS lf " +
-                        "group by film_id " +
-                        ") as pop on pop.film_id = f.id " +
-                        "left join ( " +
-                        "select * " +
-                        "from ratings as r " +
-                        ") as rat on rat.id = f.rating_mpa_id " +
-                        "order by pop.popular desc " +
-                        "limit ?; ";
-        return jdbcTemplate.query(sqlJustCount, this::getFilmsWithGenresAndMpas, count);
-    }
 
     public List<Film> getPopular(Long count) {
         String selectPopular = "SELECT f.id, f.name, f.description, \n" +
@@ -252,7 +205,6 @@ public class FilmDbStorage implements FilmStorage {
             long filmId = rs.getLong("id_film");
             final Genre genre = getGenreFromResultSet(rs);
 
-            // если жанров у фильма нет, то должен быть пустой список
             if (!resultMap.containsKey(filmId)) {
                 resultMap.put(filmId, new LinkedHashSet<>());
             }
@@ -272,7 +224,7 @@ public class FilmDbStorage implements FilmStorage {
             long filmId = rs.getLong("id_film");
             final Director director = getDirectorFromResultSet(rs);
 
-            // если режиссеров у фильма нет, то должен быть пустой список
+
             if (!resultMap.containsKey(filmId)) {
                 resultMap.put(filmId, new LinkedHashSet<>());
             }
@@ -418,36 +370,6 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToFilm, similarUserId, userId);
     }
 
-    @Override
-    public List<Film> searchFilmsByTitleAndDirector(String query, String by) {
-        String sqlQuery;
-        return switch (by) {
-            case "title" -> {
-                sqlQuery = "select f.* from films as f where f.name like concat('%',?,'%')";
-                yield jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToFilm, query);
-            }
-            case "director" -> {
-                sqlQuery = "select f.* from films as f " +
-                        "inner join film_directors as fd on f.id = fd.film_id " +
-                        "inner join directors as d on d.id = fd.director_id " +
-                        "where d.name like concat('%',?,'%')";
-                yield jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToFilm, query);
-            }
-            case "title,director", "director,title" -> {
-                String sql = "select fl.* from films as fl " +
-                        "where fl.name like concat('%',?,'%')";
-                List<Film> filmsOne = jdbcTemplate.query(sql, MapRowClass::mapRowToFilm, query);
-
-                sql = "select f.* from films as f where f.id in " +
-                        "(select fd.film_id from film_directors as fd " +
-                        "inner join directors as d on fd.director_id = d.id " +
-                        "where d.name like concat('%',?,'%'))";
-                List<Film> filmsTwo = jdbcTemplate.query(sql, MapRowClass::mapRowToFilm, query);
-                yield Stream.concat(filmsOne.stream(), filmsTwo.stream()).collect(Collectors.toList());
-            }
-            default -> throw new BadRequestException("Передан неверный запрос");
-        };
-    }
 
     public List<Film> getSortedFilmByDirector(FilmSortParameters param, long directorId) {
         if (directorDbStorage.getDirectorsByIds(List.of(directorId)).isEmpty()) {
@@ -470,7 +392,7 @@ public class FilmDbStorage implements FilmStorage {
         final List<Film> films = jdbcTemplate.query(sql, MapRowClass::mapRowToFilm2, directorId);
         final List<Long> idList = films.stream().map(Film::getId).collect(toUnmodifiableList());
         setFilmGenres(films, getFilmGenres(idList));
-        setFilmDirectors(films, getFilmDirectors(idList)); //на случай, если режиссеров несколько
+        setFilmDirectors(films, getFilmDirectors(idList));
         return films;
     }
 

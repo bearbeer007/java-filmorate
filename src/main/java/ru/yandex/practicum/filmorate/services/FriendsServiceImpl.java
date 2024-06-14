@@ -13,7 +13,6 @@ import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.MapRowClass;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -22,10 +21,6 @@ public class FriendsServiceImpl implements FriendsService {
     private final UserStorage userStorage;
     private final EventStorage eventStorage;
 
-    @Override
-    public Set<Long> getFriends(Long id) {
-        return friendsStorage.getFriends(id);
-    }
 
     @Override
     public User addFriend(Long userId, Long friendId) {

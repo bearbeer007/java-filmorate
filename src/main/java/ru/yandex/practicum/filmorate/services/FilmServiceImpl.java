@@ -168,7 +168,7 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> getFilmsSortByYearOrLikes(Long id, FilmSortParameters param) {
-        return getSortedFilmByDirector(param,id);
+        return getSortedFilmByDirector(param, id);
     }
 
     public List<Film> getSortedFilmByDirector(FilmSortParameters param, Long directorId) {
@@ -177,7 +177,7 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> searchFilmsByTitleAndDirector(String query, String obj) {
-        return search(query,obj);
+        return search(query, obj);
     }
 
     private List<Film> search(String query, String by) {

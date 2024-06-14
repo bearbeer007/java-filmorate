@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -18,7 +17,6 @@ import java.util.List;
 @RestController
 @Validated
 @RequestMapping("/films")
-@Slf4j
 @RequiredArgsConstructor
 public class FilmController {
 
@@ -27,13 +25,11 @@ public class FilmController {
 
     @PostMapping
     public Film addFilm(@Valid @RequestBody Film film) {
-        log.info("Request body: " + film.toString());
         return filmService.addFilm(film);
     }
 
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
-        log.info("Request body: " + film.toString());
         return filmService.updateFilm(film);
     }
 
@@ -61,8 +57,6 @@ public class FilmController {
     public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") @Positive Long count,
                                       @RequestParam(required = false) Integer genreId,
                                       @RequestParam(required = false) Integer year) {
-        log.info(String.format("GET /films/popular?count={count}&genreId={genreId}&year={year}, {count} = %s, " +
-                "{genreID} = %s, {year} = %s", count, genreId, year));
         return filmService.getPopularFilms(count, genreId, year);
     }
 

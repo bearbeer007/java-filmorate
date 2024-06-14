@@ -12,8 +12,6 @@ import ru.yandex.practicum.filmorate.storage.interfaces.EventStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.MapRowClass;
 
-import java.util.Set;
-
 @Service
 @RequiredArgsConstructor
 public class LikesServiceImpl implements LikesService {
@@ -22,11 +20,6 @@ public class LikesServiceImpl implements LikesService {
     private final UserService userService;
     private final EventStorage eventStorage;
 
-
-    @Override
-    public Set<Long> getLikes(Long id) {
-        return likesStorage.getLikes(id);
-    }
 
     @Override
     public Film addLike(Long filmId, Long userId) {

@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exeption.DirectorNotFoundException;
+import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.services.interfaces.DirectorService;
 import ru.yandex.practicum.filmorate.storage.interfaces.DirectorStorage;
@@ -36,7 +36,7 @@ public class DirectorServiceImpl implements DirectorService {
         if (directorStorage.findDirectorById(id).isPresent()) {
             return directorStorage.findDirectorById(id).get();
         }
-        throw new DirectorNotFoundException("The given ID is not found");
+        throw new NotFoundException("The given ID is not found");
     }
 
     @Override

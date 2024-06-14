@@ -15,7 +15,6 @@ public interface FilmStorage {
 
     Optional<Film> findFilmById(Long id);
 
-    List<Film> getPopularFilms(Long count, Integer genreId, Integer year);
 
     void addGenreToFilm(Long filmId, Integer genreId);
 
@@ -31,5 +30,4 @@ public interface FilmStorage {
 
     List<Film> findRecommendedFilms(Long userId, Long similarUserId);
 
-    List<Film> searchFilmsByTitleAndDirector(String query, String obj);
 }

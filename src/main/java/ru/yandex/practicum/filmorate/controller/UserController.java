@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -17,7 +16,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
-@Slf4j
 public class UserController {
 
     private final UserService userService;
@@ -26,13 +24,11 @@ public class UserController {
 
     @PostMapping
     public User addUser(@Valid @RequestBody User user) {
-          log.info("Request body: " + user.toString());
         return userService.addUser(user);
     }
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        log.info("Request body: " + user.toString());
         return userService.updateUser(user);
     }
 
@@ -73,7 +69,6 @@ public class UserController {
 
     @GetMapping("/{id}/feed")
     public List<Event> getEventsOfUser(@PathVariable(name = "id") Long userId) {
-        log.info(String.format("GET /users/{id}/feed, {id} = %s", userId));
         return userService.getEvents(userId);
     }
 

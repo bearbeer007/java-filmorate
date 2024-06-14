@@ -13,7 +13,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/mpa")
-@Slf4j
 @RequiredArgsConstructor
 public class MpaController {
 
