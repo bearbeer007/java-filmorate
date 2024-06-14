@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.enums.EventType;
 import ru.yandex.practicum.filmorate.model.enums.Operation;
 import ru.yandex.practicum.filmorate.services.interfaces.LikesService;
@@ -22,10 +21,10 @@ public class LikesServiceImpl implements LikesService {
 
 
     @Override
-    public Film addLike(Long filmId, Long userId) {
+    public void addLike(Long filmId, Long userId) {
         userService.getUserById(userId);
         eventStorage.addEvent(MapRowClass.mapRowToEvent(userId, filmId, EventType.LIKE, Operation.ADD));
-        return likesStorage.addLike(filmId, userId);
+        likesStorage.addLike(filmId, userId);
     }
 
     @Override

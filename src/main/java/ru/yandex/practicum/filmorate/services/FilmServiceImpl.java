@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.enums.FilmSortParameters;
 import ru.yandex.practicum.filmorate.services.interfaces.FilmService;
 import ru.yandex.practicum.filmorate.storage.*;
-import ru.yandex.practicum.filmorate.storage.interfaces.DirectorStorage;
 
 import java.util.HashSet;
 import java.util.List;
@@ -26,7 +25,7 @@ public class FilmServiceImpl implements FilmService {
     private final GenreDbStorage genreService;
     private final LikesDbStorage likesStorage;
     private final UserDbStorage userDbStorage;
-    private final DirectorStorage directorStorage;
+    private final DirectorDbStorage directorStorage;
 
     @Override
     public Film addFilm(Film film) {
@@ -168,6 +167,9 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> getFilmsSortByYearOrLikes(Long id, FilmSortParameters param) {
+        if (directorStorage.getDirectorsByIds(List.of(id)).isEmpty()) {
+            throw new NotFoundException("Режиссера с данным ID не найдено");
+        }
         return getSortedFilmByDirector(param, id);
     }
 

@@ -4,8 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.interfaces.LikesStorage;
 
 import java.util.HashSet;
@@ -17,7 +15,6 @@ import java.util.Set;
 public class LikesDbStorage implements LikesStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private final FilmStorage filmStorage;
 
     @Override
     public Set<Long> getLikes(Long id) {
@@ -26,10 +23,9 @@ public class LikesDbStorage implements LikesStorage {
     }
 
     @Override
-    public Film addLike(Long filmId, Long userId) {
+    public void addLike(Long filmId, Long userId) {
         String sqlQuery = "merge into like_films (film_id, user_id) values (?, ?)";
         jdbcTemplate.update(sqlQuery, filmId, userId);
-        return filmStorage.findFilmById(filmId).get();
     }
 
     @Override

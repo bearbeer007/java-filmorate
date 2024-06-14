@@ -36,7 +36,6 @@ public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    private final DirectorDbStorage directorDbStorage;
 
     @Override
     public Film addFilm(Film film) {
@@ -372,9 +371,6 @@ public class FilmDbStorage implements FilmStorage {
 
 
     public List<Film> getSortedFilmByDirector(FilmSortParameters param, long directorId) {
-        if (directorDbStorage.getDirectorsByIds(List.of(directorId)).isEmpty()) {
-            throw new NotFoundException("Режиссера с данным ID не найдено");
-        }
         String sql = "SELECT f.id, f.name, f.description, f.release_date, f.duration, "
                 + "f.rating_mpa_id as id_rating, r.name AS name_rating FROM films f "
                 + "JOIN film_directors fd ON fd.film_id = f.id "
