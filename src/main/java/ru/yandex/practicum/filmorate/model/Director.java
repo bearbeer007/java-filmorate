@@ -2,23 +2,15 @@ package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
+@Data
 @Builder
 public class Director {
     private Long id;
     @NotBlank
     private String name;
 
-    @Override
-    public boolean equals(Object director) {
-        if (director == null) return false;
-        if (director.getClass() != this.getClass()) return false;
-        final Director other = (Director) director;
-        if (other.id == null) return false;
-        return name.equals(other.name) && id.equals(other.id);
-    }
 }

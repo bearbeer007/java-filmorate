@@ -75,17 +75,16 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getAllFilms() {
-        String sqlQuery = """
-                SELECT f.ID,
-                       f.NAME,
-                       f.DESCRIPTION,
-                       f.RELEASE_DATE,
-                       f.DURATION,
-                       f.RATING_MPA_ID,
-                       r.NAME AS Mpa_name
-                       FROM films AS f
-                       INNER JOIN RATINGS r ON r.ID = f.RATING_MPA_ID
-                        """;
+        String sqlQuery =
+                "SELECT f.ID,\n" +
+                "f.NAME,\n" +
+                "f.DESCRIPTION,\n" +
+                "f.RELEASE_DATE,\n" +
+                "f.DURATION,\n" +
+                "f.RATING_MPA_ID,\n" +
+                "r.NAME AS Mpa_name \n" +
+                "FROM films AS f \n" +
+                "INNER JOIN RATINGS r ON r.ID = f.RATING_MPA_ID";
         return jdbcTemplate.query(sqlQuery, this::getFilmsWithGenresAndMpas);
     }
 
