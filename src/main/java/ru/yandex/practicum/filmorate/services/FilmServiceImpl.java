@@ -156,12 +156,7 @@ public class FilmServiceImpl implements FilmService {
 
         List<Long> similarUserIds = filmDbStorage.findSimilarUsersByLikes(userId);
 
-        Set<Film> recommendedFilms = new HashSet<>();
-        for (Long similarUserId : similarUserIds) {
-            List<Film> films = filmDbStorage.findRecommendedFilms(userId, similarUserId);
-            recommendedFilms.addAll(films);
-        }
-        return recommendedFilms.stream()
+        return filmDbStorage.findRecommendedFilmsBySimilarUsers(userId, similarUserIds).stream()
                 .map(this::getFullFilmObject)
                 .collect(Collectors.toSet());
     }

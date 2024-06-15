@@ -434,4 +434,13 @@ public class FilmDbStorage implements FilmStorage {
         }
         return validatedFilms;
     }
+
+    @Override
+    public List<Film> findRecommendedFilmsBySimilarUsers(Long userId, List<Long> similarUserIds) {
+        List<Film> recommendedFilms = new ArrayList<>();
+        for (Long similarUserId : similarUserIds) {
+            recommendedFilms.addAll(findRecommendedFilms(userId, similarUserId));
+        }
+        return recommendedFilms;
+    }
 }
