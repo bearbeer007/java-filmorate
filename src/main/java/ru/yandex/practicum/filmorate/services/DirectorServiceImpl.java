@@ -33,10 +33,8 @@ public class DirectorServiceImpl implements DirectorService {
     @Override
     public Director findDirectorById(Long id) {
         log.info("Search director with ID {}", id);
-        if (directorStorage.findDirectorById(id).isPresent()) {
-            return directorStorage.findDirectorById(id).get();
-        }
-        throw new NotFoundException("The given ID is not found");
+        return directorStorage.findDirectorById(id)
+                .orElseThrow(() -> new NotFoundException("The given ID is not found"));
     }
 
     @Override
