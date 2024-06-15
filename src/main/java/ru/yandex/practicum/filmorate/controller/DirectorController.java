@@ -3,9 +3,11 @@ package ru.yandex.practicum.filmorate.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.services.interfaces.DirectorService;
+import ru.yandex.practicum.filmorate.validator.interfaces.Marker;
 
 import java.util.List;
 
@@ -36,7 +38,7 @@ public class DirectorController {
     }
 
     @PutMapping
-    public Director updateDirector(@Valid @RequestBody Director director) {
+    public Director updateDirector(@Validated(Marker.onUpdate.class) @RequestBody Director director) {
         log.info("Запросн на обноление режиссера");
         return directorService.updateDirector(director);
     }
