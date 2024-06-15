@@ -47,9 +47,9 @@ public class DirectorServiceImpl implements DirectorService {
     public String removeDirectorById(Long id) {
         Optional<Director> director = directorStorage.removeDirectorById(id);
         if (director.isPresent()) {
-            return "Удалено";
+            return "Удалено: " + director.get().toString();
         } else {
-            return "Режиссер с ID " + id + "не найден или был уделен ранее";
+            return "Режиссер с ID " + id + " не найден или был удален ранее";
         }
     }
 }
