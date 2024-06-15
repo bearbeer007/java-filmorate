@@ -17,7 +17,6 @@ public class UserServiceImpl implements UserService {
     private final UserStorage userStorage;
     private final EventStorage eventStorage;
 
-
     @Override
     public User addUser(User user) {
         checkName(user);
@@ -40,11 +39,16 @@ public class UserServiceImpl implements UserService {
         return findUserById(id);
     }
 
-
     @Override
     public List<Event> getEvents(Long id) {
-        checkUserExists(id);
+        findUserById(id); // This will throw NotFoundException if the user doesn't exist
         return eventStorage.getEventsByUserId(id);
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        findUserById(id); // This ensures the user exists before attempting to delete
+        userStorage.deleteUser(id);
     }
 
     private void checkName(User user) {
@@ -56,24 +60,5 @@ public class UserServiceImpl implements UserService {
     private User findUserById(Long userId) {
         return userStorage.findUserById(userId)
                 .orElseThrow(() -> new NotFoundException(String.format("Пользователь с таким id: %s, отсутствует", userId)));
-    }
-
-    private boolean isUserExists(Long id) {
-        return userStorage.contains(id);
-    }
-
-    private void checkUserExistsWithException(Long id, final String message) {
-        if (!isUserExists(id)) {
-            throw new NotFoundException(message);
-        }
-    }
-
-    private void checkUserExists(Long id) {
-        checkUserExistsWithException(id, "Нет пользователя " + id);
-    }
-
-    @Override
-    public void deleteUser(Long id) {
-        userStorage.deleteUser(id);
     }
 }
