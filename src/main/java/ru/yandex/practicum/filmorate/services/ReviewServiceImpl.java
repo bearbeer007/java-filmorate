@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.storage.interfaces.*;
 import ru.yandex.practicum.filmorate.storage.mapper.MapRowClass;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
