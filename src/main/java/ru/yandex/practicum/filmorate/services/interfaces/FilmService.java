@@ -4,7 +4,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.enums.FilmSortParameters;
 
 import java.util.List;
-import java.util.Set;
 
 public interface FilmService {
     Film addFilm(Film film);
