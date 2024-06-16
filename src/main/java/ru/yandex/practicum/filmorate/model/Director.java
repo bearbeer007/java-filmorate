@@ -8,7 +8,7 @@ import ru.yandex.practicum.filmorate.validator.interfaces.Marker;
 @Data
 @Builder
 public class Director {
-    @NotNull(groups = Marker.onUpdate.class)
+    @NotNull(groups = Marker.OnUpdate.class)
     private Long id;
     @NotBlank
     private String name;
