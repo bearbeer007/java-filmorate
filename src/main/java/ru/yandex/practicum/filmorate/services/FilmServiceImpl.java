@@ -142,12 +142,13 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> getCommonFilms(Long userId, Long friendId) {
-        userDbStorage.findUserById(userId);
+/*        userDbStorage.findUserById(userId);
         userDbStorage.findUserById(friendId);
         List<Film> films = filmDbStorage.getCommonFilms(userId, friendId);
         return films.stream()
                 .map(this::getFullFilmObject)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList());*/
+        return filmDbStorage.getCommonFilms(userId, friendId);
     }
 
     @Override
@@ -178,7 +179,7 @@ public class FilmServiceImpl implements FilmService {
         return filmDbStorage.search(query, obj);
     }
 
-    private Film getFullFilmObject(Film film) {
+   private Film getFullFilmObject(Film film) {
         return film.toBuilder()
                 .likeIds(likesStorage.getLikes(film.getId()))
                 .mpa(mpaDbStorage.findRatingByFilmId(film.getId()).get())

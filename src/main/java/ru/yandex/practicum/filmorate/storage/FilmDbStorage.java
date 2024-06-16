@@ -336,7 +336,7 @@ public class FilmDbStorage implements FilmStorage {
                 "JOIN LIKE_FILMS AS lf ON l.FILM_ID = lf.FILM_ID " +
                 "WHERE l.USER_ID = ? and lf.USER_ID = ?";
 
-        return jdbcTemplate.query(sqlQuery, this::getFilmsWithGenres, userId, friendId);
+        return jdbcTemplate.query(sqlQuery, this::getFilmsWithGenresAndMpas, userId, friendId);
 
     }
 
