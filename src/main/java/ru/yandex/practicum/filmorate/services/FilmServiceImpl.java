@@ -104,7 +104,7 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> getAllFilms() {
-        return filmDbStorage.getAllFilms().stream().map(this::getFullFilmObject).collect(Collectors.toList());
+        return filmDbStorage.getAll();
     }
 
     @Override

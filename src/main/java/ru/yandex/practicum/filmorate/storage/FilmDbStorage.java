@@ -89,6 +89,25 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
+    public List<Film> getAll() {
+        String sqlQuery =
+                "SELECT f.ID,\n" +
+                        "f.NAME,\n" +
+                        "f.DESCRIPTION,\n" +
+                        "f.RELEASE_DATE,\n" +
+                        "f.DURATION,\n" +
+                        "f.RATING_MPA_ID,\n" +
+                        "r.NAME AS Mpa_name \n" +
+                        "FROM films AS f \n" +
+                        "INNER JOIN RATINGS r ON r.ID = f.RATING_MPA_ID";
+        final List<Film> films = jdbcTemplate.query(sqlQuery + ";", this::getFilmsWithGenresAndMpas);
+        setFilmGenres(films, getFilmGenres());
+        setFilmDirectors(films, getFilmDirectors());
+
+        return films;
+    }
+
+    @Override
     public Optional<Film> findFilmById(Long id) {
         String sqlQuery = "select f.*, " +
                 "m.id as mpa_id, m.name as mpa_name, " +
@@ -167,6 +186,15 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
+    private Map<Long, Set<Genre>> getFilmGenres() {
+        final String sql = "SELECT f.id AS id_film, g.id AS id_genre, g.name AS name_genre\n" +
+                "FROM films f\n" +
+                "LEFT JOIN film_genres fg ON fg.film_id = f.id\n" +
+                "LEFT JOIN genres g ON g.id = fg.genre_id\n" +
+                "ORDER BY g.id;";
+        return jdbcTemplate.query(sql, this::extractFilmGenres);
+    }
+
     private Map<Long, Set<Genre>> getFilmGenres(final List<Long> filmIds) {
         if (filmIds.isEmpty()) {
             return new HashMap<>();
@@ -180,6 +208,15 @@ public class FilmDbStorage implements FilmStorage {
         final SqlParameterSource parameters = new MapSqlParameterSource("ids", filmIds);
 
         return namedParameterJdbcTemplate.query(sql, parameters, this::extractFilmGenres);
+    }
+
+    private Map<Long, Set<Director>> getFilmDirectors() {
+        final String sql = "SELECT f.id AS id_film, fd.director_id AS id_director, d.name AS name_director\n" +
+                "                   FROM films f\n" +
+                "                   LEFT JOIN film_directors fd ON fd.film_id = f.id\n" +
+                "                   LEFT JOIN directors d ON d.id = fd.director_id\n" +
+                "                   ORDER BY d.id;";
+        return jdbcTemplate.query(sql, this::extractFilmDirectors);
     }
 
     private Map<Long, Set<Director>> getFilmDirectors(final List<Long> filmIds) {
