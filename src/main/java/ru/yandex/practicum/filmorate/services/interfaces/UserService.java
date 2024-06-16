@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.services.interfaces;
 
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.List;
@@ -12,4 +13,8 @@ public interface UserService {
     List<User> getAllUsers();
 
     User getUserById(Long id);
+
+    List<Event> getEvents(Long id);
+
+    void deleteUser(Long id);
 }

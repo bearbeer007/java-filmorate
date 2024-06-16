@@ -9,5 +9,4 @@ public interface MpaService {
 
     Mpa getMpaRatingById(Integer id);
 
-    Mpa getRatingByFilmId(Long id);
 }

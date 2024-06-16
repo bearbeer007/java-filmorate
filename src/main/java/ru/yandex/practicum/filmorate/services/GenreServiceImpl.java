@@ -25,8 +25,4 @@ public class GenreServiceImpl implements GenreService {
                 .orElseThrow(() -> new NotFoundException(String.format("Жанр с таким id: %s, отсутствует", id)));
     }
 
-    @Override
-    public Set<Genre> getAllGenresByFilm(Long id) {
-        return genreStorage.getAllGenresByFilm(id);
-    }
 }

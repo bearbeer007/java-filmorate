@@ -26,9 +26,4 @@ public class MpaServiceImpl implements MpaService {
                 .orElseThrow(() -> new NotFoundException(String.format("Передан отсутствующий Mpa с id: %s.", id)));
     }
 
-    @Override
-    public Mpa getRatingByFilmId(Long id) {
-        return mpaStorage.findRatingByFilmId(id)
-                .orElseThrow(() -> new NotFoundException(String.format("Mpa с film id: %s не существует", id)));
-    }
 }

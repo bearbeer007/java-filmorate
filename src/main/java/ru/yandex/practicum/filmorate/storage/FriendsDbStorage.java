@@ -8,10 +8,9 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.interfaces.FriendsStorage;
+import ru.yandex.practicum.filmorate.storage.mapper.MapRowClass;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @Component
@@ -19,11 +18,6 @@ import java.util.Set;
 public class FriendsDbStorage implements FriendsStorage {
     private final JdbcTemplate jdbcTemplate;
 
-    @Override
-    public Set<Long> getFriends(Long id) {
-        String sql = "select friend_id from users_friendship where user_id = ?";
-        return new HashSet<>(jdbcTemplate.query(sql, (rs, rn) -> rs.getLong("friend_id"), id));
-    }
 
     @Override
     public User addFriend(Long userId, Long friendId) {
