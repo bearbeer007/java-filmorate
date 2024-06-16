@@ -136,7 +136,7 @@ public class DirectorDbStorage implements DirectorStorage {
         if (director.isPresent()) {
             String sql = "delete from directors where id = ?";
             jdbcTemplate.update(sql, id);
-            log.info("Deleted");
+            log.info("Director with id: {} deleted", id);
             return director;
         } else {
             log.info("Director with id: {} not found", id);

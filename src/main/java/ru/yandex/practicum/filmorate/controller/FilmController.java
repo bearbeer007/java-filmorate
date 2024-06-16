@@ -39,7 +39,7 @@ public class FilmController {
 
     @GetMapping
     public List<Film> getAllFilms() {
-        log.info("Запрос на получение сех фильмов");
+        log.info("Запрос на получение всех фильмов");
         return filmService.getAllFilms();
     }
 
@@ -94,7 +94,7 @@ public class FilmController {
     @GetMapping(value = "/search")
     public List<Film> searchFilms(@RequestParam String query,
                                   @RequestParam String by) {
-        log.info("Запрос на поиск фильма by title and director");
+        log.info("Запрос на поиск фильма по названию и режиссёру");
         return filmService.searchFilmsByTitleAndDirector(query, by);
     }
 }

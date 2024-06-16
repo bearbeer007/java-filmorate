@@ -39,7 +39,7 @@ public class DirectorController {
 
     @PutMapping
     public Director updateDirector(@Validated(Marker.onUpdate.class) @RequestBody Director director) {
-        log.info("Запросн на обноление режиссера");
+        log.info("Запрос на обноление режиссера");
         return directorService.updateDirector(director);
     }
 

@@ -79,7 +79,7 @@ public class UserController {
 
     @GetMapping("/{id}/feed")
     public List<Event> getEventsOfUser(@PathVariable(name = "id") Long userId) {
-        log.info("Запрос на получение всех event для пользователя с id {}", userId);
+        log.info("Запрос на получение всех событий для пользователя с id {}", userId);
         return userService.getEvents(userId);
     }
 

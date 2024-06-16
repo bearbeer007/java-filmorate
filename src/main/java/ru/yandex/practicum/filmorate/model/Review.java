@@ -24,5 +24,5 @@ public class Review {
     private Boolean isPositive;
 
     @JsonProperty("useful")
-    private int rating; // рейтинг отзыва.
+    private int rating;
 }
