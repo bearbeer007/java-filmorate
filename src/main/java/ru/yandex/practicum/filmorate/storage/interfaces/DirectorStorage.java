@@ -24,4 +24,6 @@ public interface DirectorStorage {
     void setDirectorToFilm(Film film);
 
     Optional<Director> removeDirectorById(Long id);
+
+    List<Director> getDirectorsByIds(final List<Long> idList);
 }

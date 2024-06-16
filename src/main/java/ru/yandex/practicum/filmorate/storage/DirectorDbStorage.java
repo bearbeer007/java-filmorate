@@ -60,6 +60,7 @@ public class DirectorDbStorage implements DirectorStorage {
         return Optional.empty();
     }
 
+    @Override
     public List<Director> getDirectorsByIds(final List<Long> idList) {
         if (idList.isEmpty()) {
             return new ArrayList<>();

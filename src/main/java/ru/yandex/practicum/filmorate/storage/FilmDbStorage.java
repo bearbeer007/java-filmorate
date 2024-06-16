@@ -77,14 +77,14 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> getAllFilms() {
         String sqlQuery =
                 "SELECT f.ID,\n" +
-                "f.NAME,\n" +
-                "f.DESCRIPTION,\n" +
-                "f.RELEASE_DATE,\n" +
-                "f.DURATION,\n" +
-                "f.RATING_MPA_ID,\n" +
-                "r.NAME AS Mpa_name \n" +
-                "FROM films AS f \n" +
-                "INNER JOIN RATINGS r ON r.ID = f.RATING_MPA_ID";
+                        "f.NAME,\n" +
+                        "f.DESCRIPTION,\n" +
+                        "f.RELEASE_DATE,\n" +
+                        "f.DURATION,\n" +
+                        "f.RATING_MPA_ID,\n" +
+                        "r.NAME AS Mpa_name \n" +
+                        "FROM films AS f \n" +
+                        "INNER JOIN RATINGS r ON r.ID = f.RATING_MPA_ID";
         return jdbcTemplate.query(sqlQuery, this::getFilmsWithGenresAndMpas);
     }
 
@@ -150,6 +150,7 @@ public class FilmDbStorage implements FilmStorage {
         return films;
     }
 
+    @Override
     public List<Film> getPopularByGenresAndYear(Long count, Integer genreId, Integer year) {
         List<Film> filmList = getPopular(count);
         if (genreId != null) {
@@ -402,10 +403,10 @@ public class FilmDbStorage implements FilmStorage {
                 "WHERE user_id = ? " +
                 "AND film_id NOT IN (SELECT film_id FROM like_films WHERE user_id = ?)";
 
-        return jdbcTemplate.query(sqlQuery,  this::getFilmsWithGenresAndMpas, similarUserId, userId);
+        return jdbcTemplate.query(sqlQuery, this::getFilmsWithGenresAndMpas, similarUserId, userId);
     }
 
-
+    @Override
     public List<Film> getSortedFilmByDirector(FilmSortParameters param, long directorId) {
         String sql = "SELECT f.id, f.name, f.description, f.release_date, f.duration, "
                 + "f.rating_mpa_id as id_rating, r.name AS name_rating FROM films f "
@@ -428,6 +429,7 @@ public class FilmDbStorage implements FilmStorage {
         return films;
     }
 
+    @Override
     public List<Film> search(String query, String by) {
         final List<Film> films = new ArrayList<>(getPopular(null));
         final List<Film> validatedFilms = new ArrayList<>();
