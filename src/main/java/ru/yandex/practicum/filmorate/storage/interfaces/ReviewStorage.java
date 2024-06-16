@@ -8,7 +8,7 @@ import java.util.Optional;
 public interface ReviewStorage {
     Optional<Review> get(Long id);
 
-    Long add(Review review);
+    Review add(Review review);
 
     void update(Review review);
 

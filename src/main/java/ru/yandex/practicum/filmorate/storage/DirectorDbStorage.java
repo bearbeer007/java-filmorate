@@ -9,15 +9,13 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exeption.BadRequestException;
-import ru.yandex.practicum.filmorate.exeption.DirectorNotFoundException;
+import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.interfaces.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.mapper.MapRowClass;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -62,6 +60,7 @@ public class DirectorDbStorage implements DirectorStorage {
         return Optional.empty();
     }
 
+    @Override
     public List<Director> getDirectorsByIds(final List<Long> idList) {
         if (idList.isEmpty()) {
             return new ArrayList<>();
@@ -78,7 +77,7 @@ public class DirectorDbStorage implements DirectorStorage {
         Optional<Director> optionalDirector = findDirectorById(director.getId());
         if (optionalDirector.isEmpty()) {
             log.info("Director with id: {} not found.", director.getId());
-            throw new DirectorNotFoundException("Director with id: {} not found.");
+            throw new NotFoundException("Director with id: {} not found.");
         } else {
             String sqlQuery = "update directors set name = ? where id = ?";
             jdbcTemplate.update(sqlQuery, director.getName(), director.getId());
@@ -131,32 +130,6 @@ public class DirectorDbStorage implements DirectorStorage {
         log.info("Director added to the film");
     }
 
-    @Override
-    public List<Film> getFilmsSortByYearOrLikes(Long id, String obj) {
-        String sqlQuery;
-        return switch (obj) {
-            case "likes" -> {
-                sqlQuery = "select f.* from films as f " +
-                        "where f.id in " +
-                        "(select fd.film_id from film_directors as fd " +
-                        "inner join directors as d on fd.director_id = d.id " +
-                        "inner join like_films as lf on fd.film_id = lf.film_id " +
-                        "where fd.director_id = ? " +
-                        "group by fd.film_id " +
-                        "order by count(lf.user_id) DESC)";
-                yield getSortFilms(id, sqlQuery);
-            }
-            case "year" -> {
-                sqlQuery = "select f.* from films as f " +
-                        "inner join film_directors as fd on f.id = fd.film_id " +
-                        "where fd.director_id = ? " +
-                        "group by f.id, f.release_date " +
-                        "order by extract(year from CAST(f.release_date AS date)) ASC";
-                yield getSortFilms(id, sqlQuery);
-            }
-            default -> throw new BadRequestException("Передан неверный запрос");
-        };
-    }
 
     @Override
     public Optional<Director> removeDirectorById(Long id) {
@@ -164,7 +137,7 @@ public class DirectorDbStorage implements DirectorStorage {
         if (director.isPresent()) {
             String sql = "delete from directors where id = ?";
             jdbcTemplate.update(sql, id);
-            log.info("Deleted");
+            log.info("Director with id: {} deleted", id);
             return director;
         } else {
             log.info("Director with id: {} not found", id);
@@ -172,11 +145,4 @@ public class DirectorDbStorage implements DirectorStorage {
         }
     }
 
-    private List<Film> getSortFilms(Long id, String query) {
-        return jdbcTemplate.query(query, MapRowClass::mapRowToFilm, id).stream()
-                .map(film -> film.toBuilder()
-                        .directors(getDirectorsFilm(film.getId().longValue()))
-                        .build())
-                .collect(Collectors.toList());
-    }
 }

@@ -1,24 +1,16 @@
 package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+import ru.yandex.practicum.filmorate.validator.interfaces.Marker;
 
-@Getter
-@Setter
+@Data
 @Builder
 public class Director {
+    @NotNull(groups = Marker.onUpdate.class)
     private Long id;
     @NotBlank
     private String name;
 
-    @Override
-    public boolean equals(Object director) {
-        if (director == null) return false;
-        if (director.getClass() != this.getClass()) return false;
-        final Director other = (Director) director;
-        if (other.id == null) return false;
-        return name.equals(other.name) && id.equals(other.id);
-    }
 }

@@ -9,5 +9,4 @@ public interface GenreService {
 
     Genre getGenreById(Integer id);
 
-    Set<Genre> getAllGenresByFilm(Long id);
 }

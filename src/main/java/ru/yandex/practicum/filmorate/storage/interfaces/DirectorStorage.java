@@ -23,7 +23,7 @@ public interface DirectorStorage {
 
     void setDirectorToFilm(Film film);
 
-    List<Film> getFilmsSortByYearOrLikes(Long id, String obj);
-
     Optional<Director> removeDirectorById(Long id);
+
+    List<Director> getDirectorsByIds(final List<Long> idList);
 }

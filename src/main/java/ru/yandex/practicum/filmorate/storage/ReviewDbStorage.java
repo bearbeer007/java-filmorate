@@ -70,7 +70,7 @@ public class ReviewDbStorage implements ReviewStorage {
     }
 
     @Override
-    public Long add(final Review review) {
+    public Review add(final Review review) {
         final String insertSql = "INSERT INTO reviews (id_user, id_film, content, isPositive) " +
                 "VALUES (?, ?, ?, ?)";
 
@@ -88,7 +88,7 @@ public class ReviewDbStorage implements ReviewStorage {
         Long reviewId = Objects.requireNonNull(keyHolder.getKey()).longValue();
         review.setId(reviewId);
 
-        return reviewId;
+        return review;
     }
 
     @Override

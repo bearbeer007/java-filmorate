@@ -1,11 +1,18 @@
 package ru.yandex.practicum.filmorate.storage.interfaces;
 
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.enums.FilmSortParameters;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface FilmStorage {
+
+    List<Film> getPopularByGenresAndYear(Long count, Integer genreId, Integer year);
+
+    List<Film> search(String query, String by);
+
+    List<Film> getSortedFilmByDirector(FilmSortParameters param, long directorId);
 
     Film addFilm(Film film);
 
@@ -15,7 +22,7 @@ public interface FilmStorage {
 
     Optional<Film> findFilmById(Long id);
 
-    List<Film> getPopularFilms(Long count, Integer genreId, Integer year);
+    List<Film> getAll();
 
     void addGenreToFilm(Long filmId, Integer genreId);
 
@@ -31,5 +38,7 @@ public interface FilmStorage {
 
     List<Film> findRecommendedFilms(Long userId, Long similarUserId);
 
-    List<Film> searchFilmsByTitleAndDirector(String query, String obj);
+    List<Film> findRecommendedFilmsBySimilarUsers(Long userId, List<Long> similarUserIds);
+
+
 }

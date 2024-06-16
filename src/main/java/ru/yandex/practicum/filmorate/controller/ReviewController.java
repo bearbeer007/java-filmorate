@@ -18,78 +18,65 @@ import java.util.Optional;
 public class ReviewController {
     private final ReviewService reviewService;
 
-    // Добавление нового отзыва.
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Review add(@Valid @RequestBody Review newReview) {
-        log.info("POST /reviews");
-        final Long reviewId = reviewService.add(newReview);
-        log.info(String.format("Добавлен новый отзыв с id %s к фильму %s от пользователя %s", reviewId, newReview.getFilmId(), newReview.getUserId()));
-
-        return reviewService.getById(reviewId);
+        log.info("Добавление отзыва {}", newReview);
+        return reviewService.add(newReview);
     }
 
-    // Редактирование уже имеющегося отзыва.
     @PutMapping
-    public Review update(@Valid @RequestBody Review review) {
-        log.info("PUT /reviews");
+    public Review update(@RequestBody Review review) {
+        log.info("Обновление отзыва {}", review);
         reviewService.update(review);
-        log.info(String.format("Обновлена информация об отзыве с id %s", review.getId()));
-
         return reviewService.getById(review.getId());
     }
 
-    // Удаление уже имеющегося отзыва.
+
     @DeleteMapping("/{id}")
     public void delete(@PathVariable(name = "id") Long id) {
-        log.info("DELETE /reviews/{id}");
+        log.info("Удаление отзыва {}", id);
         reviewService.deleteById(id);
-        log.info(String.format("Удален отзыв с id %s", id));
     }
 
-    // Получение отзыва по идентификатору.
+
     @GetMapping("/{id}")
     public Review getReviewById(@PathVariable(name = "id") Long id) {
-        log.info(String.format("GET /reviews/{id}, {id} = %s", id));
+        log.info("Получение отзыва с id {}", id);
         return reviewService.getById(id);
     }
 
-    // Получение всех отзывов по идентификатору фильма, если фильм не указан, то все. Если кол-во не указано, то 10.
+
     @GetMapping
     public List<Review> getReviewsByFilm(@RequestParam(name = "filmId") Optional<Integer> filmId, @RequestParam(name = "count", defaultValue = "10") int count) {
-        log.info(String.format("GET /reviews?filmId={filmId}&count={count}, {filmId} = %s, {count} = %s", filmId.isPresent() ? filmId : "не указан", count));
+        log.info("Получение отзыва для фильма с id {}", filmId);
         return reviewService.getByFilmId(filmId.orElse(null), count);
     }
 
-    // пользователь ставит лайк отзыву.
+
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable(name = "id") int id, @PathVariable(name = "userId") int userId) {
-        log.info(String.format("PUT /reviews/{id}/like/{userId}, {id} = %s, {userId} = %s", id, userId));
+        log.info("Добавление лайка отзыву с id {}, пользователем с id {}", id, userId);
         reviewService.addLike(id, userId);
-        log.info(String.format("Лайк успешно добавлен для отзыва c id %s от пользователя с id %s", id, userId));
     }
 
-    // пользователь ставит дизлайк отзыву.
     @PutMapping("/{id}/dislike/{userId}")
     public void addDislike(@PathVariable(name = "id") int id, @PathVariable(name = "userId") int userId) {
-        log.info(String.format("PUT /reviews/{id}/dislike/{userId}, {id} = %s, {userId} = %s", id, userId));
+        log.info("Добавление дизлайка отзыву с id {}, пользователем с id {}", id, userId);
         reviewService.addDislike(id, userId);
-        log.info(String.format("Дизлайк успешно добавлен для отзыва c id %s от пользователя с id %s", id, userId));
     }
 
-    // пользователь удаляет лайк отзыву.
+
     @DeleteMapping("/{id}/like/{userId}")
     public void deleteLike(@PathVariable(name = "id") int id, @PathVariable(name = "userId") int userId) {
-        log.info(String.format("DELETE /reviews/{id}/like/{userId}, {id} = %s, {userId} = %s", id, userId));
+        log.info("Удаление лайка отзыва с id {}, пользователем с id {}", id, userId);
         reviewService.deleteLike(id, userId);
-        log.info(String.format("Лайк успешно удален для отзыва c id %s от пользователя с id %s", id, userId));
     }
 
-    // пользователь удаляет дизлайк отзыву.
     @DeleteMapping("/{id}/dislike/{userId}")
     public void deleteDislike(@PathVariable(name = "id") int id, @PathVariable(name = "userId") int userId) {
-        log.info(String.format("DELETE /reviews/{id}/dislike/{userId}, {id} = %s, {userId} = %s", id, userId));
+        log.info("Удаление дизлайка отзыва с id {}, пользователем с id {}", id, userId);
         reviewService.deleteDislike(id, userId);
-        log.info(String.format("Дизлайк успешно удален для отзыва c id %s от пользователя с id %s", id, userId));
     }
 }
