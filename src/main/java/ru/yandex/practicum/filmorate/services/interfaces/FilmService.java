@@ -21,9 +21,10 @@ public interface FilmService {
 
     List<Film> getCommonFilms(Long userId, Long friendId);
 
-    Set<Film> getRecommendFilms(Long userId);
+    List<Film> getRecommendFilms(Long userId);
 
     List<Film> searchFilmsByTitleAndDirector(String query, String obj);
 
     List<Film> getFilmsSortByYearOrLikes(Long id, FilmSortParameters param);
+
 }

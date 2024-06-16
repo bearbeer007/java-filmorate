@@ -13,7 +13,6 @@ import ru.yandex.practicum.filmorate.storage.*;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -142,24 +141,16 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> getCommonFilms(Long userId, Long friendId) {
-/*        userDbStorage.findUserById(userId);
-        userDbStorage.findUserById(friendId);
-        List<Film> films = filmDbStorage.getCommonFilms(userId, friendId);
-        return films.stream()
-                .map(this::getFullFilmObject)
-                .collect(Collectors.toList());*/
         return filmDbStorage.getCommonFilms(userId, friendId);
     }
 
     @Override
-    public Set<Film> getRecommendFilms(Long userId) {
+    public List<Film> getRecommendFilms(Long userId) {
         userDbStorage.findUserById(userId);
 
         List<Long> similarUserIds = filmDbStorage.findSimilarUsersByLikes(userId);
 
-        return filmDbStorage.findRecommendedFilmsBySimilarUsers(userId, similarUserIds).stream()
-                .map(this::getFullFilmObject)
-                .collect(Collectors.toSet());
+        return filmDbStorage.findRecommendedFilmsBySimilarUsers(userId, similarUserIds);
     }
 
     @Override
@@ -179,12 +170,4 @@ public class FilmServiceImpl implements FilmService {
         return filmDbStorage.search(query, obj);
     }
 
-   private Film getFullFilmObject(Film film) {
-        return film.toBuilder()
-                .likeIds(likesStorage.getLikes(film.getId()))
-                .mpa(mpaDbStorage.findRatingByFilmId(film.getId()).get())
-                .genres(genreDbStorage.getAllGenresByFilm(film.getId()))
-                .directors(directorStorage.getDirectorsFilm(film.getId().longValue()))
-                .build();
-    }
 }

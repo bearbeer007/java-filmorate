@@ -402,7 +402,7 @@ public class FilmDbStorage implements FilmStorage {
                 "WHERE user_id = ? " +
                 "AND film_id NOT IN (SELECT film_id FROM like_films WHERE user_id = ?)";
 
-        return jdbcTemplate.query(sqlQuery, MapRowClass::mapRowToFilm, similarUserId, userId);
+        return jdbcTemplate.query(sqlQuery,  this::getFilmsWithGenresAndMpas, similarUserId, userId);
     }
 
 
