@@ -7,11 +7,9 @@ import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.services.interfaces.*;
-import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.GenreDbStorage;
-import ru.yandex.practicum.filmorate.storage.LikesDbStorage;
-import ru.yandex.practicum.filmorate.storage.MpaDbStorage;
+import ru.yandex.practicum.filmorate.model.enums.FilmSortParameters;
+import ru.yandex.practicum.filmorate.services.interfaces.FilmService;
+import ru.yandex.practicum.filmorate.storage.interfaces.*;
 
 import java.util.HashSet;
 import java.util.List;
@@ -21,23 +19,23 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FilmServiceImpl implements FilmService {
 
-
-    private final FilmDbStorage filmDbStorage;
-    private final MpaDbStorage mpaService;
-    private final GenreDbStorage genreService;
-    private final LikesDbStorage likesStorage;
-
+    private final FilmStorage filmStorage;
+    private final MpaStorage mpaStorage;
+    private final GenreStorage genreStorage;
+    private final LikesStorage likesStorage;
+    private final UserStorage userStorage;
+    private final DirectorStorage directorStorage;
 
     @Override
     public Film addFilm(Film film) {
         mpaIds(film);
-        Film createdFilm = filmDbStorage.addFilm(film);
+        Film createdFilm = filmStorage.addFilm(film);
         if (film.getLikeIds() == null) {
             film.setLikeIds(new HashSet<>());
         }
         if (!film.getLikeIds().isEmpty()) {
             for (Long likeId : film.getLikeIds()) {
-                likesStorage.addLike(createdFilm.getId(), likeId);
+                likesStorage.addLike(film.getId(), likeId);
             }
         }
         if (film.getGenres() != null) {
@@ -45,25 +43,28 @@ public class FilmServiceImpl implements FilmService {
                     .stream()
                     .map(Genre::getId)
                     .collect(Collectors.toList());
-            filmDbStorage.addGenresToFilm(film.getId(), films);
+            filmStorage.addGenresToFilm(film.getId(), films);
         }
-        return createdFilm;
+        if (film.getDirectors() != null) {
+            directorStorage.setDirectorToFilm(film);
+        }
+        return getFilmById(createdFilm.getId());
     }
 
     private void mpaIds(Film film) {
-        var mpaIds = mpaService.getAllRatings().stream().map(Mpa::getId).collect(Collectors.toList());
+        var mpaIds = mpaStorage.getAllRatings().stream().map(Mpa::getId).toList();
         if (!mpaIds.contains(film.getMpa().getId())) {
             throw new BadRequestException("Передан не существующий рейтинг Mpa.");
         }
         if (film.getGenres() != null) {
-            var genresIdsDb = genreService.getAllGenres()
+            var genresIdsDb = genreStorage.getAllGenres()
                     .stream()
                     .map(Genre::getId)
-                    .collect(Collectors.toList());
+                    .toList();
             var filmsGenres = film.getGenres()
                     .stream()
                     .map(Genre::getId)
-                    .collect(Collectors.toList());
+                    .toList();
             for (Integer filmsGenreId : filmsGenres) {
                 if (!genresIdsDb.contains(filmsGenreId)) {
                     throw new BadRequestException("Передан не существующий жанр");
@@ -75,7 +76,7 @@ public class FilmServiceImpl implements FilmService {
     @Override
     public Film updateFilm(Film film) {
         mpaIds(film);
-        Film updatedFilm = filmDbStorage.updateFilm(film);
+        Film updatedFilm = filmStorage.updateFilm(film);
 
         if (film.getLikeIds() != null) {
             for (Long likeId : film.getLikeIds()) {
@@ -84,26 +85,34 @@ public class FilmServiceImpl implements FilmService {
         }
 
         if (film.getGenres() != null) {
-            List<Integer> genresIds = film.getGenres().stream().map(Genre::getId).collect(Collectors.toList());
+            List<Integer> genresIds = film.getGenres().stream().map(Genre::getId).toList();
             if (!genresIds.isEmpty()) {
-                filmDbStorage.addGenresToFilm(film.getId(), genresIds);
+                genreStorage.clearTableGenres(film.getId());
+                genresIds.forEach(genre -> filmStorage.addGenreToFilm(film.getId(), genre));
+            } else {
+                genreStorage.deleteGenresByFilm(film.getId());
             }
         }
-        return updatedFilm;
+        if (film.getDirectors() != null) {
+            directorStorage.setDirectorToFilm(film);
+        } else {
+            directorStorage.removeFilmDirectorById(film.getId());
+        }
+        return getFilmById(film.getId());
     }
 
     @Override
     public List<Film> getAllFilms() {
-        return filmDbStorage.getAllFilms();
+        return filmStorage.getAll();
     }
 
     @Override
     public Film getFilmById(Long id) {
-        Film film = filmDbStorage.findFilmById(id).orElseThrow(
+        Film film = filmStorage.findFilmById(id).orElseThrow(
                 () -> new NotFoundException(String.format("Фильм с таким id: %s, отсутствует", id))
         );
 
-        Mpa mpa = mpaService.findRatingByFilmId(id).orElseThrow(
+        Mpa mpa = mpaStorage.findRatingByFilmId(id).orElseThrow(
                 () -> new NotFoundException(String.format("Рейтинг для фильма с id: %s, отсутствует", id))
         );
 
@@ -115,14 +124,50 @@ public class FilmServiceImpl implements FilmService {
                 .releaseDate(film.getReleaseDate())
                 .mpa(mpa)
                 .likeIds(likesStorage.getLikes(film.getId()))
-                .genres(genreService.getAllGenresByFilm(film.getId()))
+                .genres(genreStorage.getAllGenresByFilm(film.getId()))
+                .directors(directorStorage.getDirectorsFilm(film.getId()))
                 .build();
     }
 
+    @Override
+    public List<Film> getPopularFilms(Long size, Integer genreId, Integer year) {
+        return filmStorage.getPopularByGenresAndYear(size, genreId, year);
+    }
 
     @Override
-    public List<Film> getPopularFilms(Long size) {
-        return filmDbStorage.getPopularFilms(size);
+    public void deleteFilm(Long id) {
+        filmStorage.deleteFilm(id);
+    }
+
+    @Override
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        return filmStorage.getCommonFilms(userId, friendId);
+    }
+
+    @Override
+    public List<Film> getRecommendFilms(Long userId) {
+        userStorage.findUserById(userId);
+
+        List<Long> similarUserIds = filmStorage.findSimilarUsersByLikes(userId);
+
+        return filmStorage.findRecommendedFilmsBySimilarUsers(userId, similarUserIds);
+    }
+
+    @Override
+    public List<Film> getFilmsSortByYearOrLikes(Long id, FilmSortParameters param) {
+        if (directorStorage.getDirectorsByIds(List.of(id)).isEmpty()) {
+            throw new NotFoundException("Режиссера с данным ID не найдено");
+        }
+        return getSortedFilmByDirector(param, id);
+    }
+
+    public List<Film> getSortedFilmByDirector(FilmSortParameters param, Long directorId) {
+        return filmStorage.getSortedFilmByDirector(param, directorId);
+    }
+
+    @Override
+    public List<Film> searchFilmsByTitleAndDirector(String query, String obj) {
+        return filmStorage.search(query, obj);
     }
 
 }
